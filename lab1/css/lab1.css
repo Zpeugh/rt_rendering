@@ -1,0 +1,54 @@
+body{
+    background-color: white;
+    font-family: sans-serif;
+}
+
+#lab1-canvas {
+    border-bottom: 1px solid black;
+    border-left: 1px solid black;
+}
+
+#main {
+    margin: 50px;
+    max-width: 800px;
+}
+
+h1#chart-title {
+    margin-left: 40%;
+}
+
+span.x-label {
+    padding-left: 79px;
+}
+
+.btn {
+    display: inline-block;
+    margin: 0 15px 0 0;
+    padding: 5px 10px;
+    font-size: 14px;
+    line-height: 1.7;
+    appearance: none;
+    box-shadow: none;
+    border: none;
+    color: white;
+}
+
+#setosa-btn{
+    background-color: #3F88C5;
+}
+
+#versicolor-btn{
+    background-color: #E94F37;
+}
+
+#virginica-btn{
+    background-color: #44BBA4;
+}
+
+#all-btn{
+    background-color: #393E41;
+}
+
+#clear-btn{
+    background-color: grey;
+}

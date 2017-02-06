@@ -1,0 +1,87 @@
+<!--
+  * Date: 1/31/2017
+  * Author: Zach Peugh
+  * Class: CSE 5542
+  * Assignment: Lab 1
+  * Desciption: Main file for lab
+-->
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" type="text/css" href="css/lab1.css">
+
+    <title>Lab 1</title>
+    <!--  ************** Fragment Shader ************* -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+        precision mediump float;
+        varying vec4 vColor;
+
+        void main(void) {
+            gl_FragColor = vColor;
+        }
+    </script>
+
+    <!--  ************** Vertex Shader ************* -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        attribute vec4 aVertexColor;
+        varying vec4 vColor;
+
+        void main(void) {
+            gl_Position = vec4(aVertexPosition, 1.0);
+            vColor = aVertexColor;
+        }
+    </script>
+
+    <script type="text/javascript" src="js/shader_setup.js"></script>
+    <script type="text/javascript" src="js/utilities.js"></script>
+    <script type="text/javascript" src="js/display.js"></script>
+    <script type="text/javascript" src="js/read_csv.js"></script>
+
+</head>
+
+<body onload="webGLStart();">
+
+    <div id="main">
+        <h1 id="chart-title"></h1>
+        <canvas id="lab1-canvas" height="400", width="800"></canvas>
+        <div id="x-labels">
+            <span class="x-label" id="x-label1">&emsp;Sepal Length</span>
+            <span class="x-label" id="x-label2">Sepal Width</span>
+            <span class="x-label" id="x-label3">&nbsp;Petal Length</span>
+            <span class="x-label" id="x-label4">&nbsp;Petal Width</span>
+        </div>
+
+        <br/>
+        <br/>
+
+        <button id="setosa-btn" class="btn" onclick="drawSetosaAverages()"> Setosa Averages </button>
+        <button id="versicolor-btn" class="btn" onclick="drawVersicolorAverages()"> Versicolor Averages </button>
+        <button id="virginica-btn" class="btn" onclick="drawVirginicaAverages()"> Virginica Averages </button>
+        <button id="all-btn" class="btn" onclick="drawAllAverages()"> Draw All </button>
+        <button id="clear-btn" class="btn" onclick="clearScreen()"> Clear </button>
+
+        <br/>
+        <br/>
+
+        <div>
+            <form class="form-horizontal well">
+                <fieldset>
+                    <label for="csvFileInput"> <strong>CSV File:</strong> </label>
+                    <input type="file" id="csvFileInput" onchange="handleFiles(this.files)" accept=".csv">
+                </fieldset>
+            </form>
+            <div id="output"></div>
+        </div>
+    </div>
+</body>
+
+</html>
