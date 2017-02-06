@@ -1,3 +1,11 @@
+/**
+ * Date: 1/31/2017
+ * Author: Zach Peugh
+ * Class: CSE 5542
+ * Assignment: Lab 1
+ * Description: File for reading in the CSV data values.
+ **/
+
 var has_data = false;
 var data = {
     species: [],

@@ -1,4 +1,12 @@
-function getShader(gl, id) {
+/**
+ * Date: 1/31/2017
+ * Author: Zach Peugh
+ * Class: CSE 5542
+ * Assignment: Lab 1
+ * Description: Shader set up file
+ **/
+
+ function getShader(gl, id) {
     var shaderScript = document.getElementById(id);
     if (!shaderScript) {
         return null;

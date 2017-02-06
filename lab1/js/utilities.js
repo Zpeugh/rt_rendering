@@ -1,3 +1,12 @@
+/**
+ * Date: 1/31/2017
+ * Author: Zach Peugh
+ * Class: CSE 5542
+ * Assignment: Lab 1
+ * Description: Extra utility functions used in the backend.
+ **/
+
+
 function minimum(arr){
     var min = arr[0];
     for (var i = 1; i < arr.length; i++) {
@@ -47,4 +56,35 @@ function scaleValues(arr, min, max){
     });
 
     return values;
+}
+
+
+function addBar(h_offset, bottom, scaled_value, width, bar_num, color_arr){
+    vertices.push(-1 + h_offset + width);  //x- top right
+    vertices.push(scaled_value);  //y- top right
+    vertices.push(0.0); //z- top right
+    vertices.push(-1 + h_offset);  //x- top left
+    vertices.push(scaled_value);  //y- top left
+    vertices.push(0.0); //z- top left
+    vertices.push(-1 + h_offset);  //x- bottom right
+    vertices.push(bottom);  //y- bottom right
+    vertices.push(0.0); //z- bottom right
+    vertices.push(-1 + h_offset + width);  //x- bottom left
+    vertices.push(bottom);  //y- bottom left
+    vertices.push(0.0); //z-bottom left
+
+    indices.push(0 + bar_num * 4);
+    indices.push(1 + bar_num * 4);
+    indices.push(2 + bar_num * 4);
+    indices.push(0 + bar_num * 4);
+    indices.push(2 + bar_num * 4);
+    indices.push(3 + bar_num * 4);
+
+    for (var i = 0; i < 4; i++){
+        colors = colors.concat(color_arr);
+    }
+}
+
+function chartTitle(title){
+    $('#chart-title').text(title);
 }

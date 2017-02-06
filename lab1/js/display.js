@@ -3,7 +3,8 @@
  * Author: Zach Peugh
  * Class: CSE 5542
  * Assignment: Lab 1
- * Desciption: Main file for lab
+ * Description: Main file containing all of the public facing
+ *              function definitions for the bar chart WebGL program 
  **/
 
 const SETOSA = "setosa";
@@ -40,8 +41,6 @@ function initGL(canvas) {
 }
 
 
-///////////////////////////////////////////////////////////////
-
 function clearCanvas(){
     vertices = [];
     indices = [];
@@ -50,32 +49,6 @@ function clearCanvas(){
     square_vertex_color_buffer = {};
     square_vertex_index_buffer = {};
     initBuffers();
-}
-
-function addBar(h_offset, bottom, scaled_value, width, bar_num, color_arr){
-    vertices.push(-1 + h_offset + width);  //x- top right
-    vertices.push(scaled_value);  //y- top right
-    vertices.push(0.0); //z- top right
-    vertices.push(-1 + h_offset);  //x- top left
-    vertices.push(scaled_value);  //y- top left
-    vertices.push(0.0); //z- top left
-    vertices.push(-1 + h_offset);  //x- bottom right
-    vertices.push(bottom);  //y- bottom right
-    vertices.push(0.0); //z- bottom right
-    vertices.push(-1 + h_offset + width);  //x- bottom left
-    vertices.push(bottom);  //y- bottom left
-    vertices.push(0.0); //z-bottom left
-
-    indices.push(0 + bar_num * 4);
-    indices.push(1 + bar_num * 4);
-    indices.push(2 + bar_num * 4);
-    indices.push(0 + bar_num * 4);
-    indices.push(2 + bar_num * 4);
-    indices.push(3 + bar_num * 4);
-
-    for (var i = 0; i < 4; i++){
-        colors = colors.concat(color_arr);
-    }
 }
 
 function createBarChart(key) {
@@ -130,10 +103,6 @@ function createAllBarCharts(){
 
     initBuffers();
     drawScene();
-}
-
-function chartTitle(title){
-    $('#chart-title').text(title);
 }
 
 function drawChart(type){
