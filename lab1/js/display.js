@@ -4,7 +4,7 @@
  * Class: CSE 5542
  * Assignment: Lab 1
  * Description: Main file containing all of the public facing
- *              function definitions for the bar chart WebGL program 
+ *              function definitions for the bar chart WebGL program
  **/
 
 const SETOSA = "setosa";

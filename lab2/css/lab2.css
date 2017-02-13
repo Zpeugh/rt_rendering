@@ -1,0 +1,28 @@
+html {
+    display: table;
+    margin: auto;
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
+    font-family: sans-serif;
+}
+
+#begin-box{
+    text-align: center;
+    margin-top: 20px;
+    width: 1750px;
+}
+
+#start-btn{
+    padding: 40px 75px;
+    background-color: black;
+    display: inline-block;
+    font-size: 40px;
+    appearance: none;
+    box-shadow: none;
+    border: none;
+    color: white;
+    margin-top: 20px;
+}
