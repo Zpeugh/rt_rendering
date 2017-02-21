@@ -16,10 +16,11 @@ body {
 }
 
 #start-btn{
-    padding: 40px 75px;
+    /*margin-left: 100px;*/
+    padding: 20px 40px;
     background-color: black;
     display: inline-block;
-    font-size: 40px;
+    font-size: 30px;
     appearance: none;
     box-shadow: none;
     border: none;
