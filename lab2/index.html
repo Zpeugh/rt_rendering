@@ -47,21 +47,22 @@
 
     <script type="text/javascript" src="js/shader_setup.js"></script>
     <script type="text/javascript" src="js/utilities.js"></script>
+    <script type="text/javascript" src="js/create_objects.js"></script>
     <script type="text/javascript" src="js/display.js"></script>
 
 </head>
 
 <body onload="webGLStart();">
     <div class="row">
-        <div class="col-md-2 col-md-offset-5"></div>
         <div id="begin-box">
-        <canvas id="lab2-canvas" height="500", width="900"></canvas>
-        <div class="row">
-            <button id="start-btn" onclick="begin()">Play!</button>
+            <div class="row score-box">
+                <span>Score: </span><span id="score"></p>
+            </div>
+            <canvas id="lab2-canvas" height="500", width="500"></canvas>
+            <div class="row">
+                <button id="start-btn" onclick="begin()">Play!</button>
+            </div>
         </div>
-        </div>
-    </div>
-
     </div>
 
 </body>

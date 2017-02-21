@@ -16,14 +16,19 @@ body {
 }
 
 #start-btn{
-    /*margin-left: 100px;*/
-    padding: 20px 40px;
+    padding: 10px 20px;
     background-color: black;
     display: inline-block;
-    font-size: 30px;
+    font-size: 24px;
     appearance: none;
     box-shadow: none;
     border: none;
     color: white;
     margin-top: 20px;
+}
+
+
+.score-box{
+    font-size: 20px;
+    color: black;
 }
