@@ -12,10 +12,10 @@ body {
 #begin-box{
     text-align: center;
     margin-top: 20px;
-    width: 1750px;
+    width: 500px;
 }
 
-#start-btn{
+#button{
     padding: 10px 20px;
     background-color: black;
     display: inline-block;
@@ -27,8 +27,9 @@ body {
     margin-top: 20px;
 }
 
-
 .score-box{
-    font-size: 20px;
+    font-size: 18px;
+    font-weight: bold;
     color: black;
+    text-align: left;
 }

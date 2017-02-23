@@ -1,17 +1,19 @@
 /**
- * Date: 2/12/2017
+ * Date: 2/23/2017
  * Author: Zach Peugh
  * Class: CSE 5542
  * Assignment: Lab 2
- * Description: Extra utility functions used in the backend.
+ * Description: Javascript file used to initialize objects for Pong game.
  **/
-
-const PADDLE_COLOR = [0.274,0.533,0.7725,1];
+const GREEN = [0.329,0.686,0.196,1];
+const BLUE = [0.274,0.533,0.7725,1];
+const WALL_WIDTH = 0.02;
 const PADDLE_XR = 1.0;
 const PADDLE_XL = 0.965;
 const PADDLE_YT = 0.2;
 const PADDLE_YB = -0.2;
-const PAD_COLOR = [1,0,0,1];
+const PADDLE_WIDTH = PADDLE_XR - PADDLE_XL;
+const PAD_COLOR = [0.878,0.282,0.218,1];
 const PAD_XR = 0.965;
 const PAD_XL = 0.95;
 const PAD_WIDTH = PAD_XR - PAD_XL;
@@ -27,10 +29,13 @@ const BALL_X = 0.0;
 const BALL_Y = 0.0;
 const BALL_RADIUS = 0.025;
 const DEG_IN_CIRCLE = 360;
+var WALL_COLOR = BLUE;
 var BALL_X_VELOCITY = -0.01243;
 var BALL_Y_VELOCITY = 0.01446;
-var PADDLE_X_SPEED = 0.1;
+var PADDLE_X_SPEED = 0.15;
 var PADDLE_Y_SPEED = 0.1;
+var PAST_BALL_X_VELOCITY = BALL_X_VELOCITY;
+var PAST_BALL_Y_VELOCITY = BALL_Y_VELOCITY;
 
 function initializePaddle(){
     mv_paddle_matrix = mat4.create();
@@ -64,7 +69,7 @@ function initializePaddle(){
     paddle_indices.push(3);
 
     for (var i = 0; i < 4; i++){
-        paddle_colors = paddle_colors.concat(PADDLE_COLOR);
+        paddle_colors = paddle_colors.concat(BLUE);
     }
 }
 
@@ -129,7 +134,7 @@ function initializePad(){
     pad_indices.push(7);
 
     for (var i = 0; i < 4; i++){
-        pad_colors = pad_colors.concat(PADDLE_COLOR);
+        pad_colors = pad_colors.concat(BLUE);
     }
 
 }
@@ -154,6 +159,40 @@ function initializeBall(){
     }
 }
 
-function randomizeBallStart(){
-    console.log("TODO");
+
+
+function initializeWall(){
+    mv_wall_matrix = mat4.create();
+    mat4.identity(mv_wall_matrix);
+
+    num_wall_vertices = 4;
+    num_wall_indices = 6;
+    num_wall_colors = 4;
+
+    wall_vertices.push(-1 + WALL_WIDTH);   //x- top right
+    wall_vertices.push(1);      //y- top right
+    wall_vertices.push(0.0);    //z- top right
+
+    wall_vertices.push(-1);     //x- top left
+    wall_vertices.push(1);      //y- top left
+    wall_vertices.push(0.0);    //z- top left
+
+    wall_vertices.push(-1 + WALL_WIDTH);   //x- bottom right
+    wall_vertices.push(-1);     //y- bottom right
+    wall_vertices.push(0.0);    //z- bottom right
+
+    wall_vertices.push(-1);     //x- bottom left
+    wall_vertices.push(-1);     //y- bottom left
+    wall_vertices.push(0.0);    //z-bottom left
+
+    wall_indices.push(0);
+    wall_indices.push(1);
+    wall_indices.push(2);
+    wall_indices.push(1);
+    wall_indices.push(2);
+    wall_indices.push(3);
+
+    for (var i = 0; i < 4; i++){
+        wall_colors = wall_colors.concat(BLUE);
+    }
 }
