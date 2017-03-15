@@ -48,11 +48,10 @@ function getColorFromKey(key){
 function scaleValues(arr, min, max){
     var new_max = 1-.1;
     var new_min = -1 + .1;
-    // var mean = average(arr);
     values = [];
 
     arr.forEach(function(val){
-        values.push( (new_max - new_min) / (max - min) * (val - max) + new_max );
+        values.push( (val - min) / (max - min) * (new_max - new_min) + new_min );
     });
 
     return values;
