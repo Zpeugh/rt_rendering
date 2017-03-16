@@ -19,8 +19,10 @@ var vMatrix = mat4.create();    // view matrix
 var mMatrix = mat4.create();    // model matrix
 var mvMatrix = mat4.create();   // modelview matrix
 var pMatrix = mat4.create();    //projection matrix
-var Z_angle = 45.0;
+var Z_ANGLE = 45.0;
 var FOV_ANGLE = 60.0;
+var CAMERA_X = 0;
+var CAMERA_Y = 0;
 
 //////////// Init OpenGL Context etc. ///////////////
 function initGL(canvas) {
@@ -99,6 +101,8 @@ function webGLStart() {
     initializeCube();
     initBuffers();
 
+    $(document).keydown(keypressHandler);
+
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     drawScene();
@@ -112,12 +116,12 @@ function drawScene() {
 
     mat4.perspective(FOV_ANGLE, 1.0, 0.1, 100, pMatrix); // set up the projection matrix
 
-    vMatrix = mat4.lookAt([0, 0, 5], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
+    vMatrix = mat4.lookAt([0, 0, 5], [CAMERA_X, CAMERA_Y, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
 
     mat4.identity(mMatrix);
 
-    console.log('Z angle = ' + Z_angle);
-    mMatrix = mat4.rotate(mMatrix, degToRad(Z_angle), [0, 1, 1]); // now set up the model matrix
+    console.log('Z angle = ' + Z_ANGLE);
+    mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 1, 1]); // now set up the model matrix
 
     mat4.multiply(vMatrix, mMatrix, mvMatrix); // mvMatrix = vMatrix * mMatrix and is the modelview Matrix
 

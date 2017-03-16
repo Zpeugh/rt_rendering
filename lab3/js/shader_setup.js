@@ -1,8 +1,8 @@
 /**
- * Date: 2/12/2017
+ * Date: 3/15/2017
  * Author: Zach Peugh
  * Class: CSE 5542
- * Assignment: Lab 2
+ * Assignment: Lab 3
  * Description: Shader set up file
  **/
 
