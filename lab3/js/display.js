@@ -13,13 +13,17 @@ var shaderProgram;
 var draw_type = 2;
 var cube_vertex_position_buffer, cube_vertex_color_buffer, cube_vertex_index_buffer;
 var cube_vertices = [], cube_indices = [], cube_colors = [];
-var num_cube_vertices = 0, num_cube_indices = 0, num_cube_colors = 0;
+var num_cube_vertices = 0, num_cube_colors = 0;
+var cylinder_vertex_position_buffer, cylinder_vertex_color_buffer;
+var cylinder_vertices = [], cylinder_colors = [];
+var num_cylinder_vertices = 0, num_cylinder_colors = 0;
 var mv_cube_matrix = mat4.create();
+var mv_cylinder_matrix = mat4.create();
 var vMatrix = mat4.create();    // view matrix
 var mMatrix = mat4.create();    // model matrix
 var mvMatrix = mat4.create();   // modelview matrix
 var pMatrix = mat4.create();    //projection matrix
-var Z_ANGLE = 45.0;
+var Z_ANGLE = 15.0;
 var FOV_ANGLE = 60.0;
 var CAMERA_X = 0;
 var CAMERA_Y = 0;
@@ -43,13 +47,18 @@ function clearCanvas() {
     cube_vertex_position_buffer = {};
     cube_vertex_color_buffer = {};
     cube_vertex_index_buffer = {};
+    cylinder_vertices = [];
+    cylinder_indices = [];
+    cylinder_colors = [];
+    cylinder_vertex_position_buffer = {};
+    cylinder_vertex_color_buffer = {};
     initBuffers();
 }
 
 /////////////////////////  Initialize VBO  /////////////////////////
 function initBuffers() {
 
-    // Initialize cube
+    // Cube buffers
     cube_vertex_position_buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cube_vertex_position_buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cube_vertices), gl.STATIC_DRAW);
@@ -68,6 +77,18 @@ function initBuffers() {
     cube_vertex_color_buffer.itemSize = 4;
     cube_vertex_color_buffer.numItems = num_cube_colors;
 
+    //Cylinder buffers
+    cylinder_vertex_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cylinder_vertices), gl.STATIC_DRAW);
+    cylinder_vertex_position_buffer.itemSize = 3;
+    cylinder_vertex_position_buffer.numItems = num_cylinder_vertices;
+
+    cylinder_vertex_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cylinder_colors), gl.STATIC_DRAW);
+    cylinder_vertex_color_buffer.itemSize = 4;
+    cylinder_vertex_color_buffer.numItems = num_cylinder_colors;
 }
 
 function drawCube() {
@@ -80,6 +101,18 @@ function drawCube() {
     // draw elementary arrays - triangle indices
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube_vertex_index_buffer);
     gl.drawElements(gl.TRIANGLES, num_cube_indices, gl.UNSIGNED_SHORT, 0);
+}
+
+function drawCylinder() {
+    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_position_buffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cylinder_vertex_position_buffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_color_buffer);
+    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cylinder_vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    // draw elementary arrays - triangle indices
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinder_vertex_index_buffer);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, cylinder_vertex_position_buffer.numItems);
 }
 
 function webGLStart() {
@@ -99,6 +132,7 @@ function webGLStart() {
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 
     initializeCube();
+    initializeCylinder();
     initBuffers();
 
     $(document).keydown(keypressHandler);
@@ -128,4 +162,5 @@ function drawScene() {
     setMatrixUniforms();
 
     drawCube();
+    drawCylinder();
 }
