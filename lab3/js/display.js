@@ -1,5 +1,5 @@
 /**
- * Date: 2/23/2017
+ * Date: 3/15/2017
  * Author: Zach Peugh
  * Class: CSE 5542
  * Assignment: Lab 3
@@ -17,14 +17,18 @@ var num_cube_vertices = 0, num_cube_colors = 0;
 var cylinder_vertex_position_buffer, cylinder_vertex_color_buffer;
 var cylinder_vertices = [], cylinder_colors = [];
 var num_cylinder_vertices = 0, num_cylinder_colors = 0;
+var sphere_vertex_position_buffer, sphere_vertex_index_buffer, sphere_vertex_color_buffer;
+var sphere_vertices = [], sphere_indices = [], sphere_colors = [];
+var num_sphere_vertices = 0, num_sphere_indices = 0, num_sphere_colors = 0;
 var mv_cube_matrix = mat4.create();
 var mv_cylinder_matrix = mat4.create();
+var mv_sphere_matrix = mat4.create();
 var vMatrix = mat4.create();    // view matrix
 var mMatrix = mat4.create();    // model matrix
 var mvMatrix = mat4.create();   // modelview matrix
 var pMatrix = mat4.create();    //projection matrix
-var Z_ANGLE = 15.0;
-var FOV_ANGLE = 60.0;
+var Z_ANGLE = 10.0;
+var FOV_ANGLE = 45.0;
 var CAMERA_X = 0;
 var CAMERA_Y = 0;
 
@@ -48,10 +52,15 @@ function clearCanvas() {
     cube_vertex_color_buffer = {};
     cube_vertex_index_buffer = {};
     cylinder_vertices = [];
-    cylinder_indices = [];
     cylinder_colors = [];
     cylinder_vertex_position_buffer = {};
     cylinder_vertex_color_buffer = {};
+    sphere_vertices = [];
+    sphere_indices = [];
+    sphere_colors = [];
+    sphere_vertex_position_buffer = {};
+    sphere_vertex_index_buffer = {};
+    sphere_vertex_color_buffer = {};
     initBuffers();
 }
 
@@ -89,6 +98,25 @@ function initBuffers() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cylinder_colors), gl.STATIC_DRAW);
     cylinder_vertex_color_buffer.itemSize = 4;
     cylinder_vertex_color_buffer.numItems = num_cylinder_colors;
+
+    //Sphere buffers
+    sphere_vertex_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphere_vertices), gl.STATIC_DRAW);
+    sphere_vertex_position_buffer.itemSize = 3;
+    sphere_vertex_position_buffer.numItems = num_sphere_vertices;
+
+    sphere_vertex_index_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphere_vertex_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(sphere_indices), gl.STATIC_DRAW);
+    sphere_vertex_index_buffer.itemsize = 1;
+    sphere_vertex_index_buffer.numItems = num_sphere_indices;
+
+    sphere_vertex_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphere_colors), gl.STATIC_DRAW);
+    sphere_vertex_color_buffer.itemSize = 4;
+    sphere_vertex_color_buffer.numItems = num_sphere_colors;
 }
 
 function drawCube() {
@@ -110,9 +138,19 @@ function drawCylinder() {
     gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_color_buffer);
     gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cylinder_vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    // draw elementary arrays - triangle indices
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinder_vertex_index_buffer);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, cylinder_vertex_position_buffer.numItems);
+}
+
+function drawSphere() {
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_position_buffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, sphere_vertex_position_buffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_color_buffer);
+    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, sphere_vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    // draw elementary arrays - triangle indices
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphere_vertex_index_buffer);
+    gl.drawElements(gl.TRIANGLES, num_sphere_indices, gl.UNSIGNED_SHORT, 0);
 }
 
 function webGLStart() {
@@ -133,6 +171,7 @@ function webGLStart() {
 
     initializeCube();
     initializeCylinder();
+    initializeSphere();
     initBuffers();
 
     $(document).keydown(keypressHandler);
@@ -150,11 +189,11 @@ function drawScene() {
 
     mat4.perspective(FOV_ANGLE, 1.0, 0.1, 100, pMatrix); // set up the projection matrix
 
-    vMatrix = mat4.lookAt([0, 0, 5], [CAMERA_X, CAMERA_Y, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
+    // vMatrix = mat4.lookAt([0, 3, 8], [CAMERA_X, CAMERA_Y, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
+    vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, 8], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
 
     mat4.identity(mMatrix);
 
-    console.log('Z angle = ' + Z_ANGLE);
     mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 1, 1]); // now set up the model matrix
 
     mat4.multiply(vMatrix, mMatrix, mvMatrix); // mvMatrix = vMatrix * mMatrix and is the modelview Matrix
@@ -163,4 +202,5 @@ function drawScene() {
 
     drawCube();
     drawCylinder();
+    drawSphere();
 }

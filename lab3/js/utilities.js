@@ -45,40 +45,31 @@ function keypressHandler(key) {
             console.log("Up");
             break;
         case PANE_RIGHT:
-            console.log("Pane Left");
             CAMERA_X -= PANE_SPEED;
             drawScene();
             break;
         case PANE_LEFT:
-            console.log("Pane Right");
             CAMERA_X += PANE_SPEED;
             drawScene();
             break;
         case PANE_UP:
-            console.log("Pane Down");
             CAMERA_Y -= PANE_SPEED;
             drawScene();
             break;
         case PANE_DOWN:
-            console.log("Pane Up");
             CAMERA_Y += PANE_SPEED;
             drawScene();
             break;
         case Z_UP:
-            console.log("Z Up");
             Z_ANGLE += Z_SPEED;
             drawScene();
             break;
         case Z_DOWN:
-            console.log("Z Down");
             Z_ANGLE -= Z_SPEED;
             drawScene();
             break;
         case ENTER:
             console.log("Enter");
-            break;
-        case SPACE:
-            console.log("space");
             break;
         default:
             console.log("Invalid keypress: " + key.which);
