@@ -11,23 +11,16 @@
 var gl;
 var shaderProgram;
 var draw_type = 2;
-var cube_vertex_position_buffer, cube_vertex_color_buffer, cube_vertex_index_buffer;
-var cube_vertices = [], cube_indices = [], cube_colors = [];
-var num_cube_vertices = 0, num_cube_colors = 0;
-var cylinder_vertex_position_buffer, cylinder_vertex_color_buffer;
-var cylinder_vertices = [], cylinder_colors = [];
-var num_cylinder_vertices = 0, num_cylinder_colors = 0;
-var sphere_vertex_position_buffer, sphere_vertex_index_buffer, sphere_vertex_color_buffer;
-var sphere_vertices = [], sphere_indices = [], sphere_colors = [];
-var num_sphere_vertices = 0, num_sphere_indices = 0, num_sphere_colors = 0;
-var mv_cube_matrix = mat4.create();
-var mv_cylinder_matrix = mat4.create();
-var mv_sphere_matrix = mat4.create();
+var body = {};
+var head = {};
+var left_arm = {};
+var right_arm = {};
+var bottom = {};
 var vMatrix = mat4.create();    // view matrix
 var mMatrix = mat4.create();    // model matrix
 var mvMatrix = mat4.create();   // modelview matrix
 var pMatrix = mat4.create();    //projection matrix
-var Z_ANGLE = 10.0;
+var Z_ANGLE = 0.0;
 var FOV_ANGLE = 45.0;
 var CAMERA_X = 0;
 var CAMERA_Y = 0;
@@ -44,114 +37,43 @@ function initGL(canvas) {
     }
 }
 
-function clearCanvas() {
-    cube_vertices = [];
-    cube_indices = [];
-    cube_colors = [];
-    cube_vertex_position_buffer = {};
-    cube_vertex_color_buffer = {};
-    cube_vertex_index_buffer = {};
-    cylinder_vertices = [];
-    cylinder_colors = [];
-    cylinder_vertex_position_buffer = {};
-    cylinder_vertex_color_buffer = {};
-    sphere_vertices = [];
-    sphere_indices = [];
-    sphere_colors = [];
-    sphere_vertex_position_buffer = {};
-    sphere_vertex_index_buffer = {};
-    sphere_vertex_color_buffer = {};
-    initBuffers();
+
+function drawObject(object, triangle_type) {
+    mat4.perspective(FOV_ANGLE, 1.0, 0.1, 100, pMatrix); // set up the projection matrix
+    vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, 8], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
+
+    mat4.identity(mMatrix);
+    mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 0, 1]); // now set up the model matrix
+
+    mat4.multiply(vMatrix, mMatrix, mvMatrix); // mvMatrix = vMatrix * mMatrix and is the modelview Matrix
+    mat4.multiply(mvMatrix, object.matrix, mvMatrix);
+
+    setMatrixUniforms();
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_position_buffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, object.vertex_position_buffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_color_buffer);
+    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, object.vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    switch (triangle_type){
+        case "TRIANGLE_STRIP":
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, object.vertex_position_buffer.numItems);
+            break;
+        case "TRIANGLES":
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, object.vertex_index_buffer);
+            gl.drawElements(gl.TRIANGLES, object.vertex_index_buffer.numItems, gl.UNSIGNED_SHORT, 0);
+            break;
+        case "TRIANGLE_FAN":
+            gl.drawArrays(gl.TRIANGLE_FAN, 0, object.vertex_position_buffer.numItems);
+            break;
+        default:
+            console.log("Invalid triangle_type. Options are TRIANGLES, TRIANGLE_STRIP, or TRIANGLE_FAN");
+    }
 }
 
-/////////////////////////  Initialize VBO  /////////////////////////
-function initBuffers() {
 
-    // Cube buffers
-    cube_vertex_position_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cube_vertex_position_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cube_vertices), gl.STATIC_DRAW);
-    cube_vertex_position_buffer.itemSize = 3;
-    cube_vertex_position_buffer.numItems = num_cube_vertices;
 
-    cube_vertex_index_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube_vertex_index_buffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cube_indices), gl.STATIC_DRAW);
-    cube_vertex_index_buffer.itemsize = 1;
-    cube_vertex_index_buffer.numItems = num_cube_indices;
-
-    cube_vertex_color_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cube_vertex_color_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cube_colors), gl.STATIC_DRAW);
-    cube_vertex_color_buffer.itemSize = 4;
-    cube_vertex_color_buffer.numItems = num_cube_colors;
-
-    //Cylinder buffers
-    cylinder_vertex_position_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_position_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cylinder_vertices), gl.STATIC_DRAW);
-    cylinder_vertex_position_buffer.itemSize = 3;
-    cylinder_vertex_position_buffer.numItems = num_cylinder_vertices;
-
-    cylinder_vertex_color_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_color_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cylinder_colors), gl.STATIC_DRAW);
-    cylinder_vertex_color_buffer.itemSize = 4;
-    cylinder_vertex_color_buffer.numItems = num_cylinder_colors;
-
-    //Sphere buffers
-    sphere_vertex_position_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_position_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphere_vertices), gl.STATIC_DRAW);
-    sphere_vertex_position_buffer.itemSize = 3;
-    sphere_vertex_position_buffer.numItems = num_sphere_vertices;
-
-    sphere_vertex_index_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphere_vertex_index_buffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(sphere_indices), gl.STATIC_DRAW);
-    sphere_vertex_index_buffer.itemsize = 1;
-    sphere_vertex_index_buffer.numItems = num_sphere_indices;
-
-    sphere_vertex_color_buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_color_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphere_colors), gl.STATIC_DRAW);
-    sphere_vertex_color_buffer.itemSize = 4;
-    sphere_vertex_color_buffer.numItems = num_sphere_colors;
-}
-
-function drawCube() {
-    gl.bindBuffer(gl.ARRAY_BUFFER, cube_vertex_position_buffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cube_vertex_position_buffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, cube_vertex_color_buffer);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cube_vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    // draw elementary arrays - triangle indices
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube_vertex_index_buffer);
-    gl.drawElements(gl.TRIANGLES, num_cube_indices, gl.UNSIGNED_SHORT, 0);
-}
-
-function drawCylinder() {
-    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_position_buffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cylinder_vertex_position_buffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder_vertex_color_buffer);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, cylinder_vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, cylinder_vertex_position_buffer.numItems);
-}
-
-function drawSphere() {
-    gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_position_buffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, sphere_vertex_position_buffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_color_buffer);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, sphere_vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    // draw elementary arrays - triangle indices
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphere_vertex_index_buffer);
-    gl.drawElements(gl.TRIANGLES, num_sphere_indices, gl.UNSIGNED_SHORT, 0);
-}
 
 function webGLStart() {
     var canvas = document.getElementById("lab3-canvas");
@@ -169,10 +91,18 @@ function webGLStart() {
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 
-    initializeCube();
-    initializeCylinder();
-    initializeSphere();
-    initBuffers();
+    body = createCube(0,0,0,0.5,BLUE);
+    left_arm = createCylinder(0, 0, 0, 0.125, 0.75, GREEN, 50, 100);
+    left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(90), [1, 0, 0]);
+    left_arm.matrix = mat4.translate(left_arm.matrix, [0.25, 0.5, -0.2]);
+
+    right_arm = createCylinder(0, 0, 0, 0.125, 0.75, GREEN, 50, 100);
+    right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(90), [1, 0, 0]);
+    right_arm.matrix = mat4.translate(right_arm.matrix, [-0.25, 0.5, -0.2]);
+
+    head = createCube(0,0.75,0,0.25,[1,0,0,1]);
+
+    bottom = createSphere(0, -1, 0, 0.5, [1,0,0,1], 50, 100);
 
     $(document).keydown(keypressHandler);
 
@@ -187,20 +117,9 @@ function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    mat4.perspective(FOV_ANGLE, 1.0, 0.1, 100, pMatrix); // set up the projection matrix
-
-    // vMatrix = mat4.lookAt([0, 3, 8], [CAMERA_X, CAMERA_Y, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
-    vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, 8], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
-
-    mat4.identity(mMatrix);
-
-    mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 1, 1]); // now set up the model matrix
-
-    mat4.multiply(vMatrix, mMatrix, mvMatrix); // mvMatrix = vMatrix * mMatrix and is the modelview Matrix
-
-    setMatrixUniforms();
-
-    drawCube();
-    drawCylinder();
-    drawSphere();
+    drawObject(left_arm, "TRIANGLE_STRIP");
+    drawObject(right_arm, "TRIANGLE_STRIP");
+    drawObject(body, "TRIANGLES");
+    drawObject(head, "TRIANGLES");
+    drawObject(bottom, "TRIANGLES");
 }
