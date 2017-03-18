@@ -11,19 +11,27 @@
 var gl;
 var shaderProgram;
 var draw_type = 2;
+var floor = {};
 var body = {};
 var head = {};
 var left_arm = {};
 var right_arm = {};
 var bottom = {};
+var movementMatrix = mat4.create();
 var vMatrix = mat4.create();    // view matrix
-var mMatrix = mat4.create();    // model matrix
+var mMatrix = mat4.create();    // model matrixs
 var mvMatrix = mat4.create();   // modelview matrix
 var pMatrix = mat4.create();    //projection matrix
 var Z_ANGLE = 0.0;
 var FOV_ANGLE = 45.0;
-var CAMERA_X = 0;
-var CAMERA_Y = 0;
+var CAMERA_X = -4;
+var CAMERA_Y = 10;
+const LIGHTGREY = [0.827, 0.827, 0.827, 1];
+const POS_X = 1;
+const POS_Z = 2;
+const NEG_X = 3;
+const NEG_Z = 4;
+var DIRECTION = POS_X;
 
 //////////// Init OpenGL Context etc. ///////////////
 function initGL(canvas) {
@@ -37,17 +45,20 @@ function initGL(canvas) {
     }
 }
 
+function setMVmatrix(){
+        mat4.perspective(FOV_ANGLE, 1.0, 0.1, 100, pMatrix); // set up the projection matrix
+        vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, 20], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
+
+        mat4.identity(mMatrix);
+        mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 0, 1]); // now set up the model matrix
+
+        mat4.multiply(vMatrix, mMatrix, mvMatrix); // mvMatrix = vMatrix * mMatrix and is the modelview Matrix
+        return mvMatrix;
+}
 
 function drawObject(object, triangle_type) {
-    mat4.perspective(FOV_ANGLE, 1.0, 0.1, 100, pMatrix); // set up the projection matrix
-    vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, 8], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
 
-    mat4.identity(mMatrix);
-    mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 0, 1]); // now set up the model matrix
-
-    mat4.multiply(vMatrix, mMatrix, mvMatrix); // mvMatrix = vMatrix * mMatrix and is the modelview Matrix
     mat4.multiply(mvMatrix, object.matrix, mvMatrix);
-
     setMatrixUniforms();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_position_buffer);
@@ -73,6 +84,21 @@ function drawObject(object, triangle_type) {
 }
 
 
+function initializeRobot(){
+    body = createCube(0,0,0,0.5,BLUE);
+    left_arm = createCylinder(0, 0, 0, 0.125, 0.75, GREEN, 50, 100);
+    left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(90), [1, 0, 0]);
+    left_arm.matrix = mat4.translate(left_arm.matrix, [0.25, 0.5, -0.2]);
+
+    right_arm = createCylinder(0, 0, 0, 0.125, 0.75, GREEN, 50, 100);
+    right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(90), [1, 0, 0]);
+    right_arm.matrix = mat4.translate(right_arm.matrix, [-0.25, 0.5, -0.2]);
+
+    head = createCube(0,0.75,0,0.25,[1,0,0,1]);
+
+    bottom = createSphere(0, -1, 0, 0.5, [1,0,0,1], 50, 100);
+}
+
 
 
 function webGLStart() {
@@ -91,18 +117,11 @@ function webGLStart() {
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
 
-    body = createCube(0,0,0,0.5,BLUE);
-    left_arm = createCylinder(0, 0, 0, 0.125, 0.75, GREEN, 50, 100);
-    left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(90), [1, 0, 0]);
-    left_arm.matrix = mat4.translate(left_arm.matrix, [0.25, 0.5, -0.2]);
+    mat4.identity(movementMatrix);
 
-    right_arm = createCylinder(0, 0, 0, 0.125, 0.75, GREEN, 50, 100);
-    right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(90), [1, 0, 0]);
-    right_arm.matrix = mat4.translate(right_arm.matrix, [-0.25, 0.5, -0.2]);
+    floor = createPlane(0,-1.5,0,10,10,0.01,LIGHTGREY);
 
-    head = createCube(0,0.75,0,0.25,[1,0,0,1]);
-
-    bottom = createSphere(0, -1, 0, 0.5, [1,0,0,1], 50, 100);
+    initializeRobot();
 
     $(document).keydown(keypressHandler);
 
@@ -117,9 +136,17 @@ function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    drawObject(left_arm, "TRIANGLE_STRIP");
-    drawObject(right_arm, "TRIANGLE_STRIP");
-    drawObject(body, "TRIANGLES");
-    drawObject(head, "TRIANGLES");
+
+    mvMatrix = setMVmatrix();
+    drawObject(floor, "TRIANGLES");
+    mvMatrix = mat4.multiply(mvMatrix, movementMatrix);
     drawObject(bottom, "TRIANGLES");
+    drawObject(body, "TRIANGLES");
+    drawObject(left_arm, "TRIANGLE_STRIP");
+    mvMatrix = setMVmatrix();
+    mvMatrix = mat4.multiply(mvMatrix, movementMatrix);
+    drawObject(right_arm, "TRIANGLE_STRIP");
+    mvMatrix = setMVmatrix();
+    mvMatrix = mat4.multiply(mvMatrix, movementMatrix);
+    drawObject(head, "TRIANGLES");
 }

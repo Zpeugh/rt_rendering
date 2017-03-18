@@ -21,6 +21,90 @@ const SPHERE_CENTER_Z = -6;
 const DEG_IN_CIRCLE = 360;
 
 
+function createPlane(x, y, z, length, width, thickness, color){
+    mat = mat4.create();
+    mat4.identity(mat);
+
+    var plane = {
+        matrix : mat,
+        vertex_position_buffer : {},
+        vertex_index_buffer : {},
+        vertex_color_buffer : {}
+    };
+
+    var vertices = [];
+    var indices = [];
+    var colors = [];
+    var num_vertices = 8;
+    var num_indices = 36;
+    var num_colors = 8;
+
+    // Draw the vertices
+    vertices.push(x + width);    //x
+    vertices.push(y + thickness);    //y
+    vertices.push(z + -length);   //z
+
+    vertices.push(x + -width);   //x
+    vertices.push(y + thickness);    //y
+    vertices.push(z + -length);   //z
+
+    vertices.push(x + -width);   //x
+    vertices.push(y + -thickness);   //y
+    vertices.push(z + -length);   //z
+
+    vertices.push(x + width);    //x
+    vertices.push(y + -thickness);   //y
+    vertices.push(z + -length);   //z
+
+    vertices.push(x + width);    //x
+    vertices.push(y + thickness);    //y
+    vertices.push(z + length);    //z
+
+    vertices.push(x + -width);   //x
+    vertices.push(y + thickness);    //y
+    vertices.push(z + length);    //z
+
+    vertices.push(x + -width);   //x
+    vertices.push(y + -thickness);   //y
+    vertices.push(z + length);    //z
+
+    vertices.push(x + width);    //x
+    vertices.push(y + -thickness);   //y
+    vertices.push(z + length);    //z
+
+    // Add the vertex indices
+    indices = [0, 1, 2, 0, 2, 3, 0, 3, 7, 0, 7, 4, 6, 2, 3, 6, 3, 7,
+                    5, 1, 2, 5, 2, 6, 5, 1, 0, 5, 0, 4, 5, 6, 7, 5, 7, 4];
+    // Add the vertex colors
+    for (var i = 0; i < 8; i++) {
+        colors = colors.concat(color);
+    }
+
+    // Create Buffer Objects
+    plane.vertex_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    plane.vertex_position_buffer.itemSize = 3;
+    plane.vertex_position_buffer.numItems = num_vertices;
+
+    plane.vertex_index_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    plane.vertex_index_buffer.itemsize = 1;
+    plane.vertex_index_buffer.numItems = num_indices;
+
+    plane.vertex_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    plane.vertex_color_buffer.itemSize = 4;
+    plane.vertex_color_buffer.numItems = num_colors;
+
+
+    return plane;
+}
+
+
+
 function createCube(x, y, z, rad, color){
     mat = mat4.create();
     mat4.identity(mat);

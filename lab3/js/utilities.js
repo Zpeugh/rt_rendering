@@ -30,19 +30,95 @@ function degToRad(degrees) {
     return degrees * Math.PI / 180;
 }
 
+
+function changeDirection(dir){
+    switch (dir.toLowerCase()){
+        case "left":
+            if (DIRECTION == POS_X){
+                DIRECTION = NEG_Z;
+            } else if (DIRECTION == NEG_Z){
+                DIRECTION = NEG_X;
+            } else if (DIRECTION == NEG_X){
+                DIRECTION = POS_Z;
+            } else if (DIRECTION == POS_Z){
+                DIRECTION = POS_X;
+            }
+            movementMatrix = mat4.rotate(movementMatrix, degToRad(90), [0, 1, 0]);
+            console.log(DIRECTION);
+            break;
+        case "right":
+            if (DIRECTION == POS_X){
+                DIRECTION = POS_Z;
+            } else if (DIRECTION == NEG_Z){
+                DIRECTION = POS_X;
+            } else if (DIRECTION == NEG_X){
+                DIRECTION = NEG_Z;
+            } else if (DIRECTION == POS_Z){
+                DIRECTION = NEG_X;
+            }
+            movementMatrix = mat4.rotate(movementMatrix, degToRad(-90), [0, 1, 0]);
+            console.log(DIRECTION);
+            break;
+        default:
+            console.log("Invalid direction");
+            return;
+    }
+}
+
+
+function moveRobot(direction){
+    switch (direction.toLowerCase()){
+        case "left":
+            changeDirection("left");
+            movementMatrix = mat4.translate(movementMatrix, [-0.15, 0, 0]);
+            break;
+        case "right":
+            changeDirection("right");
+            movementMatrix = mat4.translate(movementMatrix, [0.15, 0, 0]);
+            break;
+        case "back":
+            changeDirection("left");
+            changeDirection("left");
+            movementMatrix = mat4.translate(movementMatrix, [0, 0, -.15]);
+            break;
+        case "forward":
+            movementMatrix = mat4.translate(movementMatrix, [0, 0, .15]);
+            break;
+        case "rotate_left":
+            changeDirection("left");
+            break;
+        case "rotate_right":
+            changeDirection("right");
+            break;
+        default:
+            console.log("Invalid direction");
+            return;
+    }
+    drawScene();
+}
+
+
 function keypressHandler(key) {
     switch (key.which) {
         case LEFT:
-            console.log("Left");
+            if (key.shiftKey){
+                moveRobot("rotate_left");
+            } else {
+            moveRobot("left");
+            }
             break;
         case RIGHT:
-            console.log("Right");
+            if (key.shiftKey){
+                moveRobot("rotate_right");
+            } else {
+                moveRobot("right");
+            }
             break;
         case DOWN:
-            console.log("Down");
+            moveRobot("back");
             break;
         case UP:
-            console.log("Up");
+            moveRobot("forward");
             break;
         case PANE_RIGHT:
             CAMERA_X -= PANE_SPEED;
@@ -69,7 +145,8 @@ function keypressHandler(key) {
             drawScene();
             break;
         case ENTER:
-            console.log("Enter");
+            break;
+        case SHIFT:
             break;
         default:
             console.log("Invalid keypress: " + key.which);
