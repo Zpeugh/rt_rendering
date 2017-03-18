@@ -18,3 +18,6 @@ To move the robot use:
     <up arrow>:         move forward
     <enter>:            do dance move 1
     shift + <enter>:    do dance move 1
+
+
+The bonus task that I attempted was making a cute little robot that dances.
