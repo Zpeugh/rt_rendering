@@ -24,9 +24,9 @@ var mvMatrix = mat4.create();   // modelview matrix
 var pMatrix = mat4.create();    //projection matrix
 var Z_ANGLE = 0.0;
 var FOV_ANGLE = 45.0;
-var CAMERA_X = -4;
-var CAMERA_Y = 10;
-const LIGHTGREY = [0.827, 0.827, 0.827, 1];
+var CAMERA_X = 1;
+var CAMERA_Y = 8;
+const LIGHTGREY = [0.9, 0.9, 0.9, 1];
 const POS_X = 1;
 const POS_Z = 2;
 const NEG_X = 3;
@@ -47,7 +47,7 @@ function initGL(canvas) {
 
 function setMVmatrix(){
         mat4.perspective(FOV_ANGLE, 1.0, 0.1, 100, pMatrix); // set up the projection matrix
-        vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, 20], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
+        vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, 15], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
 
         mat4.identity(mMatrix);
         mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 0, 1]); // now set up the model matrix
@@ -95,7 +95,6 @@ function initializeRobot(){
     right_arm.matrix = mat4.translate(right_arm.matrix, [-0.25, 0.5, -0.2]);
 
     head = createCube(0,0.75,0,0.25,[1,0,0,1]);
-
     bottom = createSphere(0, -1, 0, 0.5, [1,0,0,1], 50, 100);
 }
 
@@ -119,7 +118,7 @@ function webGLStart() {
 
     mat4.identity(movementMatrix);
 
-    floor = createPlane(0,-1.5,0,10,10,0.01,LIGHTGREY);
+    floor = createPlane(0,-1.5,0,8,8,0.01,LIGHTGREY);
 
     initializeRobot();
 
@@ -142,11 +141,9 @@ function drawScene() {
     mvMatrix = mat4.multiply(mvMatrix, movementMatrix);
     drawObject(bottom, "TRIANGLES");
     drawObject(body, "TRIANGLES");
+    drawObject(head, "TRIANGLES");
     drawObject(left_arm, "TRIANGLE_STRIP");
     mvMatrix = setMVmatrix();
     mvMatrix = mat4.multiply(mvMatrix, movementMatrix);
     drawObject(right_arm, "TRIANGLE_STRIP");
-    mvMatrix = setMVmatrix();
-    mvMatrix = mat4.multiply(mvMatrix, movementMatrix);
-    drawObject(head, "TRIANGLES");
 }
