@@ -1,0 +1,35 @@
+html {
+    display: table;
+    margin: auto;
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
+    font-family: sans-serif;
+}
+
+#begin-box{
+    text-align: center;
+    margin-top: 20px;
+    width: 500px;
+}
+
+#button{
+    padding: 10px 20px;
+    background-color: black;
+    display: inline-block;
+    font-size: 24px;
+    appearance: none;
+    box-shadow: none;
+    border: none;
+    color: white;
+    margin-top: 20px;
+}
+
+.score-box{
+    font-size: 18px;
+    font-weight: bold;
+    color: black;
+    text-align: left;
+}

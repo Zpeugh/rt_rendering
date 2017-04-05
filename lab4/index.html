@@ -1,0 +1,134 @@
+<!--
+  * Date: 3/15/2017
+  * Author: Zach Peugh
+  * Class: CSE 5542
+  * Assignment: Lab 3
+  * Desciption: Main html file for lab 3
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="js/glMatrix-0.9.5.min.js"></script>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" type="text/css" href="css/display.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+
+    <title>Lab 4</title>
+    <!--  ************** Fragment Shader ************* -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+      precision mediump float;
+
+      // uniform mat4 uMVMatrix;
+      // uniform mat4 uVMatrix;
+      // uniform mat4 uPMatrix;
+      // uniform mat4 uNMatrix;
+      //
+      // uniform vec4 light_pos;
+      // uniform vec4 ambient_coef;
+      // uniform vec4 diffuse_coef;
+      // uniform vec4 specular_coef;
+      // uniform float mat_shininess;
+      //
+      // uniform vec4 light_ambient;
+      // uniform vec4 light_diffuse;
+      // uniform vec4 light_specular;
+
+      varying vec4 vColor;
+
+      void main(void) {
+        gl_FragColor = vColor;
+      }
+    </script>
+
+    <!--  ************** Vertex Shader ************* -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+
+
+      precision mediump float;
+      attribute vec3 aVertexPosition;
+      attribute vec3 aVertexNormal;
+      attribute vec4 aVertexColor;
+
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+      uniform mat4 uNMatrix;
+
+      uniform vec4 light_pos;
+      uniform vec4 ambient_coef;
+      uniform vec4 diffuse_coef;
+      uniform vec4 specular_coef;
+      uniform float mat_shininess;
+
+      uniform vec4 light_ambient;
+      uniform vec4 light_diffuse;
+      uniform vec4 light_specular;
+
+      varying vec4 vColor;
+
+      void main(void) {
+
+        vec4 pos_in_eye;  //vertex position in eye space
+        vec3 normal_in_eye;  // vertex normal
+
+        // transform light pos from local to eye space
+        // vec4 light_pos_in_eye = uVMatrix  * light_pos;   // if light is defeined in world space
+        vec4 light_pos_in_eye = light_pos;    // if light is alerady defined in eye spaced
+
+        // transform normal from local to eye space: normal matrix is the inverse transpose of the modelview matrix
+        normal_in_eye =normalize(vec3(uNMatrix*vec4(aVertexNormal,0.0)));
+
+        // transform the vertex position to eye space
+        pos_in_eye =  uMVMatrix * vec4(aVertexPosition, 1.0);
+
+        // light vector L = l-p
+        vec3 light_vector = normalize(vec3(light_pos_in_eye - pos_in_eye));
+
+        // eye vector V = e-p, where e is (0,0,0)  and p is 'pos_in_eye'
+        vec3 eye_vector = normalize(-vec3(pos_in_eye));
+
+        vec4 ambient = ambient_coef * light_ambient;
+        float ndotl = max(dot(normal_in_eye, light_vector), 0.0);
+
+        vec4 diffuse = diffuse_coef * light_diffuse* ndotl;
+
+        //      both lines below are okay. One is to use the reflect function the other is to compute by yourself
+        //      vec3 R= normalize(vec3(reflect(-light_vector, normal_in_eye)));
+        vec3 R = normalize(2.0 * ndotl * normal_in_eye-eye_vector);
+        float rdotv = max(dot(R, eye_vector), 0.0);
+
+        vec4 specular;
+        if ( ndotl > 0.0 )
+          specular = specular_coef * light_specular * pow(rdotv, mat_shininess);
+        else
+          specular = vec4(0,0,0,1);
+
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+
+        vColor = ambient + diffuse + specular;
+        // gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        // vColor = aVertexColor;
+        //      vColor = vec4(eye_vector, 1.0);      //debug: use eye_vector as the color
+            //  vColor = vec4(normal_in_eye, 1.0);   //debug: use normal vector as the color
+      }
+    </script>
+
+    <script type="text/javascript" src="js/shader_setup.js"></script>
+    <script type="text/javascript" src="js/utilities.js"></script>
+    <script type="text/javascript" src="js/create_objects.js"></script>
+    <script type="text/javascript" src="js/display.js"></script>
+
+</head>
+
+<body onload="webGLStart();">
+        <div class="row">
+            <canvas id="lab4-canvas" height="500" , width="500"></canvas>
+        </div>
+    </div>
+
+</body>
+
+</html>
