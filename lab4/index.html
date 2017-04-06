@@ -33,28 +33,36 @@
       uniform vec4 specular_color;
 
       varying vec3 light_pos_in_eye;
-      varying vec3 interpreted_normal;
+      varying vec3 normal_in_eye;
       varying vec3 vert_pos;
-      varying vec3 v_color;
+      varying vec3 vert_color;
 
       void main(void) {
-          vec3 normal = interpreted_normal;
+          // Calculate light direction
           vec3 light_dir = normalize(vec3(light_pos_in_eye) - vec3(vert_pos));
-          vec3 reflect_dir = reflect(-light_dir, normal);
+
+          // Calculate reflection direction
+          vec3 reflect_dir = reflect(-light_dir, normal_in_eye);
+
+          // Calculate view direction
           vec3 view_dir = normalize(-vert_pos);
 
-          float l_dot_norm = max(dot(light_dir,normal), 0.0);
+          // Calculate the dot product between light direction and normal in eye
+          float l_dot_norm = max(dot(light_dir,normal_in_eye), 0.0);
+
           float specular = 0.0;
 
+          // Compute the specular coefficient
           if (l_dot_norm > 0.0) {
              float specular_angle = max( dot(reflect_dir, view_dir), 0.0);
              specular = pow(specular_angle, mat_shininess);
           }
 
           // Calculate the final color: ambient/object + diffuse + specular
-          gl_FragColor = vec4(v_color + l_dot_norm * vec3(diffuse_color) +
+          gl_FragColor = vec4(vert_color + l_dot_norm * vec3(diffuse_color) +
                               specular * vec3(specular_color), 1.0);
       }
+      
     </script>
 
     <!--  ************** Vertex Shader ************* -->
@@ -75,58 +83,27 @@
       uniform vec4 ambient_coef;
       uniform vec4 ambient_color;
 
-      varying vec3 v_color;
-      varying vec3 interpreted_normal;
+      varying vec3 vert_color;
+      varying vec3 normal_in_eye;
       varying vec3 vert_pos;
       varying vec3 light_pos_in_eye;
 
       void main(void) {
 
-        vec4 pos_in_eye;  //vertex position in eye space
-        vec3 normal_in_eye;  // vertex normal
-
         // transform light pos from local to eye space
-        light_pos_in_eye = vec3(uVMatrix * light_pos);   // if light is defeined in world space
-        // vec4 light_pos_in_eye = light_pos;    // if light is alerady defined in eye spaced
+        light_pos_in_eye = vec3(uVMatrix * light_pos);
 
-        // transform normal from local to eye space: normal matrix is the inverse transpose of the modelview matrix
+        // Pass the normal in eye space to the fragment shader
         normal_in_eye = normalize(vec3(uNMatrix * vec4(aVertexNormal,0.0)));
 
-        interpreted_normal = normalize(normal_in_eye);
-        // transform the vertex position to eye space
-        // pos_in_eye = uMVMatrix * vec4(aVertexPosition, 1.0);
-
-        // light vector L = l-p
-        // vec3 light_vector = normalize(vec3(light_pos_in_eye - pos_in_eye));
-
-        // eye vector V = e-p, where e is (0,0,0)  and p is 'pos_in_eye'
-        // vec3 eye_vector = normalize(-vec3(pos_in_eye));
-
-        // float n_dot_l = max(dot(normal_in_eye, light_vector), 0.0);
-
-        // vec4 diffuse = diffuse_coef * diffuse_color * n_dot_l;
-
-        //      both lines below are okay. One is to use the reflect function the other is to compute by yourself
-        //      vec3 R= normalize(vec3(reflect(-light_vector, normal_in_eye)));
-        // vec3 R = normalize(2.0 * n_dot_l * normal_in_eye-eye_vector);
-        // float r_dot_v = max(dot(R, eye_vector), 0.0);
-
-        // vec4 specular;
-        // if ( n_dot_l > 0.0 )
-        //   specular = specular_coef * specular_color * pow(r_dot_v, mat_shininess);
-        // else
-        //   specular = vec4(0,0,0,1);
-
+        // Set the vertex position
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
+        // Pass vertex position to fragment shader
         vert_pos = vec3(gl_Position);
-        // v_color = ambient + diffuse + specular;
-        v_color = vec3(ambient_coef * aVertexColor);
 
-        // gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        // v_color = aVertexColor;
-        //      v_color = vec4(eye_vector, 1.0);      //debug: use eye_vector as the color
-            //  v_color = vec4(normal_in_eye, 1.0);   //debug: use normal vector as the color
+        // Pass the interpreted vertex color to the fragment shader
+        vert_color = vec3(ambient_coef * aVertexColor);
       }
     </script>
 
