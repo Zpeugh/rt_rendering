@@ -27,7 +27,7 @@
         gl.compileShader(shader);
 
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            alert(gl.getShaderInfoLog(shader));
+            console.error(gl.getShaderInfoLog(shader));
             return null;
         }
 
@@ -47,7 +47,7 @@
         gl.linkProgram(shaderProgram);
 
         if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            alert("Could not initialise shaders");
+            console.error(gl.getProgramInfoLog(shaderProgram));
         }
 
         gl.useProgram(shaderProgram);

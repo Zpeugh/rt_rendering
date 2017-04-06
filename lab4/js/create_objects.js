@@ -14,8 +14,6 @@ const SPHERE_COLOR = [0.86, 0.12, 0.196, 1];
 const SPHERE_RADIUS = 0.5;
 const SPHERE_CENTER_Y = 0;
 const SPHERE_CENTER_Z = -6;
-const DEG_IN_CIRCLE = 360;
-
 
 function createSquare(size) {
   mat = mat4.create();
@@ -73,8 +71,6 @@ function createSquare(size) {
   return square;
 
 }
-
-
 
 
 function createPlane(x, y, z, length, width, thickness, color) {
@@ -137,8 +133,8 @@ function createPlane(x, y, z, length, width, thickness, color) {
   // Add the vertex colors
   for (var i = 0; i < 8; i++) {
     normals.push(0.0);
+    normals.push(1.0);
     normals.push(0.0);
-    normals.push(-1.0);
     colors = colors.concat(color);
   }
 
@@ -222,9 +218,10 @@ function createCube(x, y, z, rad, color) {
   vertices.push(y + -rad); //y
   vertices.push(z + rad); //z
 
-  vertices.push(x + rad); //x
-  vertices.push(y + -rad); //y
-  vertices.push(z + rad); //z
+  vertices.push(x + rad);   //x
+  vertices.push(y + -rad);  //y
+  vertices.push(z + rad);   //z
+
   normals = [
     // Front face
     0.0, 0.0, 1.0,
@@ -295,7 +292,6 @@ function createCube(x, y, z, rad, color) {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
   cube.vertex_color_buffer.itemSize = 4;
   cube.vertex_color_buffer.numItems = num_colors;
-
 
   return cube;
 }

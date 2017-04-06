@@ -22,6 +22,7 @@ const ENTER = 13;
 const PAUSE = 80;
 
 function setMatrixUniforms() {
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, vMatrix);
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);

@@ -13,9 +13,10 @@ var FOV_ANGLE = 45.0;
 var CAMERA_X = 1;
 var CAMERA_Y = 8;
 var LIGHT_X = 0;
-var LIGHT_Y = 4;
-var LIGHT_Z = 2;
+var LIGHT_Y = -10;
+var LIGHT_Z = 0;
 const LIGHTGREY = [0.9, 0.9, 0.9, 1];
+const WHITE = [1, 1, 1, 1];
 const POS_X = 1;
 const POS_Z = 2;
 const NEG_X = 3;
@@ -37,12 +38,12 @@ var mMatrix = mat4.create();    // model matrixs
 var mvMatrix = mat4.create();   // modelview matrix
 var pMatrix = mat4.create();    // projection matrix
 var nMatrix = mat4.create();    // normal matrix
-var light_pos = [LIGHT_X, LIGHT_Y, LIGHT_Z, 1]; // eye space position
-var light_ambient = [0, 0, 0, 1];
-var light_diffuse = [.8, .8, .8, 1];
-var light_specular = [1, 1, 1, 1];
-var mat_ambient = [0, 0, 0, 1];
-var mat_diffuse = [1, 1, 0, 1];
+var light_pos = [LIGHT_X, LIGHT_Y, LIGHT_Z, 1]; // world space position
+var ambient_color = WHITE;
+var diffuse_color = WHITE;
+var specular_color = WHITE;
+var mat_ambient = [0.5, 0.5, 0.5, 1];
+var mat_diffuse = [0.6, 0.6, 0.6, 1];
 var mat_specular = [.9, .9, .9, 1];
 var mat_shine = [50];
 
@@ -82,16 +83,16 @@ function drawObject(object, triangle_type) {
     nMatrix = mat4.inverse(nMatrix);
     nMatrix = mat4.transpose(nMatrix);
 
-    shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
+    // shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
     gl.uniform4f(shaderProgram.light_posUniform, light_pos[0], light_pos[1], light_pos[2], light_pos[3]);
     gl.uniform4f(shaderProgram.ambient_coefUniform, mat_ambient[0], mat_ambient[1], mat_ambient[2], 1.0);
     gl.uniform4f(shaderProgram.diffuse_coefUniform, mat_diffuse[0], mat_diffuse[1], mat_diffuse[2], 1.0);
     gl.uniform4f(shaderProgram.specular_coefUniform, mat_specular[0], mat_specular[1], mat_specular[2], 1.0);
     gl.uniform1f(shaderProgram.shininess_coefUniform, mat_shine[0]);
 
-    gl.uniform4f(shaderProgram.light_ambientUniform, light_ambient[0], light_ambient[1], light_ambient[2], 1.0);
-    gl.uniform4f(shaderProgram.light_diffuseUniform, light_diffuse[0], light_diffuse[1], light_diffuse[2], 1.0);
-    gl.uniform4f(shaderProgram.light_specularUniform, light_specular[0], light_specular[1], light_specular[2], 1.0);
+    gl.uniform4f(shaderProgram.light_ambientUniform, ambient_color[0], ambient_color[1], ambient_color[2], 1.0);
+    gl.uniform4f(shaderProgram.light_diffuseUniform, diffuse_color[0], diffuse_color[1], diffuse_color[2], 1.0);
+    gl.uniform4f(shaderProgram.light_specularUniform, specular_color[0], specular_color[1], specular_color[2], 1.0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_position_buffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, object.vertex_position_buffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -128,7 +129,6 @@ function initializeRobot(){
 }
 
 
-
 function webGLStart() {
     var canvas = document.getElementById("lab4-canvas");
     initGL(canvas);
@@ -138,25 +138,26 @@ function webGLStart() {
 
     shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-    //
+
     shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "aVertexNormal");
     gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 
     shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
     gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
+    shaderProgram.vMatrixUniform = gl.getUniformLocation(shaderProgram, "uVMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
     shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
+    shaderProgram.light_colorUniform = gl.getUniformLocation(shaderProgram, "light_color");
     shaderProgram.ambient_coefUniform = gl.getUniformLocation(shaderProgram, "ambient_coef");
     shaderProgram.diffuse_coefUniform = gl.getUniformLocation(shaderProgram, "diffuse_coef");
     shaderProgram.specular_coefUniform = gl.getUniformLocation(shaderProgram, "specular_coef");
     shaderProgram.shininess_coefUniform = gl.getUniformLocation(shaderProgram, "mat_shininess");
-    shaderProgram.light_ambientUniform = gl.getUniformLocation(shaderProgram, "light_ambient");
-    shaderProgram.light_diffuseUniform = gl.getUniformLocation(shaderProgram, "light_diffuse");
-    shaderProgram.light_specularUniform = gl.getUniformLocation(shaderProgram, "light_specular");
-
+    shaderProgram.light_ambientUniform = gl.getUniformLocation(shaderProgram, "ambient_color");
+    shaderProgram.light_diffuseUniform = gl.getUniformLocation(shaderProgram, "diffuse_color");
+    shaderProgram.light_specularUniform = gl.getUniformLocation(shaderProgram, "specular_color");
 
     mat4.identity(movementMatrix);
 
@@ -167,7 +168,7 @@ function webGLStart() {
 
     $(document).keydown(keypressHandler);
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.3, 0.3, 0.3, 1.0);
 
     drawScene();
 }
@@ -178,7 +179,6 @@ function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     mvMatrix = setMVmatrix();
-
     drawObject(floor, "TRIANGLES");
     mvMatrix = mat4.multiply(mvMatrix, movementMatrix);
     drawObject(bottom, "TRIANGLES");
