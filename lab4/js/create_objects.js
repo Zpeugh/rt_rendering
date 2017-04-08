@@ -15,443 +15,654 @@ const SPHERE_RADIUS = 0.5;
 const SPHERE_CENTER_Y = 0;
 const SPHERE_CENTER_Z = -6;
 
-function createSquare(size) {
-  mat = mat4.create();
-  mat4.identity(mat);
+function createPlane(x, y, z, length, width, thickness, color){
+    mat = mat4.create();
+    mat4.identity(mat);
 
-  var square = {
-    matrix: mat,
-    vertex_position_buffer: {},
-    vertex_index_buffer: {},
-    vertex_normal_buffer: {},
-    vertex_color_buffer: {}
-  };
+    var plane = {
+        matrix: mat,
+        vertex_position_buffer: {},
+        vertex_index_buffer: {},
+        vertex_normal_buffer: {},
+        vertex_color_buffer: {}
+    };
 
-  var vertices = [
-    size, size, 0, -size, size, 0, -size, -size, 0,
-    size, -size, 0 ];
-  var indices = [0, 1, 2, 0, 2, 3];
-  var normals = [
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0
-  ];
-  var colors = [
-    1.0, 0.0, 0.0, 1.0,
-    1.0, 0.0, 0.0, 1.0,
-    1.0, 0.0, 0.0, 1.0,
-    1.0, 0.0, 0.0, 1.0
-  ];
+    var vertices = [];
+    var indices = [];
+    var normals = [];
+    var colors = [];
 
-  square.vertex_position_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, square.vertex_position_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  square.vertex_position_buffer.itemSize = 3;
-  square.vertex_position_buffer.numItems = 4;
+    // Draw the vertices
+    // Front Face
+    vertices.push(x - length); //x
+    vertices.push(y - width); //y
+    vertices.push(z + thickness); //z
 
-  square.vertex_normal_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, square.vertex_normal_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-  square.vertex_normal_buffer.itemSize = 3;
-  square.vertex_normal_buffer.numItems = 4;
+    vertices.push(x + length); //x
+    vertices.push(y - width); //y
+    vertices.push(z + thickness); //z
 
-  square.vertex_index_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, square.vertex_index_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-  square.vertex_index_buffer.itemSize = 1;
-  square.vertex_index_buffer.numItems = 6;
+    vertices.push(x + length); //x
+    vertices.push(y + width); //y
+    vertices.push(z + thickness); //z
 
-  square.vertex_color_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, square.vertex_color_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-  square.vertex_color_buffer.itemSize = 4;
-  square.vertex_color_buffer.numItems = 4;
+    vertices.push(x - length); //x
+    vertices.push(y + width); //y
+    vertices.push(z + thickness); //z
 
-  return square;
+    // Back Face
+    vertices.push(x - length); //x
+    vertices.push(y - width); //y
+    vertices.push(z - thickness); //z
 
+    vertices.push(x - length); //x
+    vertices.push(y + width); //y
+    vertices.push(z - thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y + width); //y
+    vertices.push(z - thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y - width); //y
+    vertices.push(z - thickness); //z
+
+    // Top Face
+    vertices.push(x - length); //x
+    vertices.push(y + width); //y
+    vertices.push(z - thickness); //z
+
+    vertices.push(x - length); //x
+    vertices.push(y + width); //y
+    vertices.push(z + thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y + width); //y
+    vertices.push(z + thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y + width); //y
+    vertices.push(z - thickness); //z
+
+    // Bottom Face
+    vertices.push(x - length); //x
+    vertices.push(y - width); //y
+    vertices.push(z - thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y - width); //y
+    vertices.push(z - thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y - width); //y
+    vertices.push(z + thickness); //z
+
+    vertices.push(x - length); //x
+    vertices.push(y - width); //y
+    vertices.push(z + thickness); //z
+
+    // Right Face
+    vertices.push(x + length); //x
+    vertices.push(y - width); //y
+    vertices.push(z - thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y + width); //y
+    vertices.push(z - thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y + width); //y
+    vertices.push(z + thickness); //z
+
+    vertices.push(x + length); //x
+    vertices.push(y - width); //y
+    vertices.push(z + thickness); //z
+
+    // Left Face
+    vertices.push(x - length); //x
+    vertices.push(y - width); //y
+    vertices.push(z - thickness); //z
+
+    vertices.push(x - length); //x
+    vertices.push(y - width); //y
+    vertices.push(z + thickness); //z
+
+    vertices.push(x - length); //x
+    vertices.push(y + width); //y
+    vertices.push(z + thickness); //z
+
+    vertices.push(x - length); //x
+    vertices.push(y + width); //y
+    vertices.push(z - thickness); //z
+
+    normals = [
+        // Front face
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+
+        // Back face
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+
+        // Top face
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+
+        // Bottom face
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+
+        // Right face
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+
+        // Left face
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+    ];
+    // Add the vertex indices
+    indices = [ 0, 1, 2, 0, 2, 3,       // Front face
+                4, 5, 6, 4, 6, 7,       // Back face
+                8, 9, 10, 8, 10, 11,    // Top face
+                12, 13, 14, 12, 14, 15, // Bottom face
+                16, 17, 18, 16, 18, 19, // Right face
+                20, 21, 22, 20, 22, 23  // Left face
+    ];
+    // Add the vertex colors
+    for (var i = 0; i < 24; i++) {
+        colors = colors.concat(color);
+    }
+
+    // Create Buffer Objects
+    plane.vertex_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    plane.vertex_position_buffer.itemSize = 3;
+    plane.vertex_position_buffer.numItems = 24;
+
+    plane.vertex_index_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    plane.vertex_index_buffer.itemSize = 1;
+    plane.vertex_index_buffer.numItems = 36;
+
+    plane.vertex_normal_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_normal_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+    plane.vertex_normal_buffer.itemSize = 3;
+    plane.vertex_normal_buffer.numItems = 24;
+
+    plane.vertex_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    plane.vertex_color_buffer.itemSize = 4;
+    plane.vertex_color_buffer.numItems = 24;
+
+    return plane;
 }
 
-
-function createPlane(x, y, z, length, width, thickness, color) {
-  mat = mat4.create();
-  mat4.identity(mat);
-
-  var plane = {
-    matrix: mat,
-    vertex_position_buffer: {},
-    vertex_index_buffer: {},
-    vertex_normal_buffer: {},
-    vertex_color_buffer: {}
-  };
-
-  var vertices = [];
-  var indices = [];
-  var normals = [];
-  var colors = [];
-  var num_vertices = 8;
-  var num_indices = 36;
-  var num_colors = 8;
-
-  // Draw the vertices
-  vertices.push(x + width); //x
-  vertices.push(y + thickness); //y
-  vertices.push(z + -length); //z
-
-  vertices.push(x + -width); //x
-  vertices.push(y + thickness); //y
-  vertices.push(z + -length); //z
-
-  vertices.push(x + -width); //x
-  vertices.push(y + -thickness); //y
-  vertices.push(z + -length); //z
-
-  vertices.push(x + width); //x
-  vertices.push(y + -thickness); //y
-  vertices.push(z + -length); //z
-
-  vertices.push(x + width); //x
-  vertices.push(y + thickness); //y
-  vertices.push(z + length); //z
-
-  vertices.push(x + -width); //x
-  vertices.push(y + thickness); //y
-  vertices.push(z + length); //z
-
-  vertices.push(x + -width); //x
-  vertices.push(y + -thickness); //y
-  vertices.push(z + length); //z
-
-  vertices.push(x + width); //x
-  vertices.push(y + -thickness); //y
-  vertices.push(z + length); //z
-
-  // Add the vertex indices
-  indices = [0, 1, 2, 0, 2, 3, 0, 3, 7, 0, 7, 4, 6, 2, 3, 6, 3, 7,
-    5, 1, 2, 5, 2, 6, 5, 1, 0, 5, 0, 4, 5, 6, 7, 5, 7, 4
-  ];
-  // Add the vertex colors
-  for (var i = 0; i < 8; i++) {
-    normals.push(0.0);
-    normals.push(1.0);
-    normals.push(0.0);
-    colors = colors.concat(color);
-  }
-
-  // Create Buffer Objects
-  plane.vertex_position_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_position_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  plane.vertex_position_buffer.itemSize = 3;
-  plane.vertex_position_buffer.numItems = num_vertices;
-
-  plane.vertex_index_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_index_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-  plane.vertex_index_buffer.itemSize = 1;
-  plane.vertex_index_buffer.numItems = num_indices;
-
-  plane.vertex_normal_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_normal_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-  plane.vertex_normal_buffer.itemSize = 3;
-  plane.vertex_normal_buffer.numItems = num_vertices;
-
-  plane.vertex_color_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_color_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-  plane.vertex_color_buffer.itemSize = 4;
-  plane.vertex_color_buffer.numItems = num_colors;
-
-
-  return plane;
-}
-
+//
+// function createPlane(x, y, z, length, width, thickness, color) {
+//     mat = mat4.create();
+//     mat4.identity(mat);
+//
+//     var plane = {
+//         matrix: mat,
+//         vertex_position_buffer: {},
+//         vertex_index_buffer: {},
+//         vertex_normal_buffer: {},
+//         vertex_color_buffer: {}
+//     };
+//
+//     var vertices = [];
+//     var indices = [];
+//     var normals = [];
+//     var colors = [];
+//     var num_vertices = 8;
+//     var num_indices = 36;
+//     var num_colors = 8;
+//
+//     // Draw the vertices
+//     vertices.push(x + width); //x
+//     vertices.push(y + thickness); //y
+//     vertices.push(z + -length); //z
+//
+//     vertices.push(x + -width); //x
+//     vertices.push(y + thickness); //y
+//     vertices.push(z + -length); //z
+//
+//     vertices.push(x + -width); //x
+//     vertices.push(y + -thickness); //y
+//     vertices.push(z + -length); //z
+//
+//     vertices.push(x + width); //x
+//     vertices.push(y + -thickness); //y
+//     vertices.push(z + -length); //z
+//
+//     vertices.push(x + width); //x
+//     vertices.push(y + thickness); //y
+//     vertices.push(z + length); //z
+//
+//     vertices.push(x + -width); //x
+//     vertices.push(y + thickness); //y
+//     vertices.push(z + length); //z
+//
+//     vertices.push(x + -width); //x
+//     vertices.push(y + -thickness); //y
+//     vertices.push(z + length); //z
+//
+//     vertices.push(x + width); //x
+//     vertices.push(y + -thickness); //y
+//     vertices.push(z + length); //z
+//
+//     // Add the vertex indices
+//     indices = [0, 1, 2, 0, 2, 3, 0, 3, 7, 0, 7, 4, 6, 2, 3, 6, 3, 7,
+//         5, 1, 2, 5, 2, 6, 5, 1, 0, 5, 0, 4, 5, 6, 7, 5, 7, 4
+//     ];
+//     // Add the vertex colors
+//     for (var i = 0; i < 8; i++) {
+//         colors = colors.concat(color);
+//     }
+//     normals.push(0.0);
+//     normals.push(1.0);
+//     normals.push(0.0);
+//
+//     // Create Buffer Objects
+//     plane.vertex_position_buffer = gl.createBuffer();
+//     gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_position_buffer);
+//     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+//     plane.vertex_position_buffer.itemSize = 3;
+//     plane.vertex_position_buffer.numItems = num_vertices;
+//
+//     plane.vertex_index_buffer = gl.createBuffer();
+//     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_index_buffer);
+//     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+//     plane.vertex_index_buffer.itemSize = 1;
+//     plane.vertex_index_buffer.numItems = num_indices;
+//
+//     plane.vertex_normal_buffer = gl.createBuffer();
+//     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_normal_buffer);
+//     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+//     plane.vertex_normal_buffer.itemSize = 3;
+//     plane.vertex_normal_buffer.numItems = 1;
+//
+//     plane.vertex_color_buffer = gl.createBuffer();
+//     gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_color_buffer);
+//     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+//     plane.vertex_color_buffer.itemSize = 4;
+//     plane.vertex_color_buffer.numItems = num_colors;
+//
+//     return plane;
+// }
+//
 
 
 function createCube(x, y, z, rad, color) {
-  mat = mat4.create();
-  mat4.identity(mat);
+    mat = mat4.create();
+    mat4.identity(mat);
 
-  var cube = {
-    matrix: mat,
-    vertex_position_buffer: {},
-    vertex_index_buffer: {},
-    vertex_normal_buffer: {},
-    vertex_color_buffer: {}
-  };
+    var cube = {
+        matrix: mat,
+        vertex_position_buffer: {},
+        vertex_index_buffer: {},
+        vertex_normal_buffer: {},
+        vertex_color_buffer: {}
+    };
 
-  var vertices = [];
-  var indices = [];
-  var normals = [];
-  var colors = [];
-  var num_vertices = 8;
-  var num_indices = 36;
-  var num_colors = num_vertices;
+    var vertices = [];
+    var indices = [];
+    var normals = [];
+    var colors = [];
 
-  // Draw the vertices
-  vertices.push(x + rad); //x
-  vertices.push(y + rad); //y
-  vertices.push(z + -rad); //z
+    // Draw the vertices
+    // Front Face
+    vertices.push(x - rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z + rad); //z
 
-  vertices.push(x + -rad); //x
-  vertices.push(y + rad); //y
-  vertices.push(z + -rad); //z
+    vertices.push(x + rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z + rad); //z
 
-  vertices.push(x + -rad); //x
-  vertices.push(y + -rad); //y
-  vertices.push(z + -rad); //z
+    vertices.push(x + rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z + rad); //z
 
-  vertices.push(x + rad); //x
-  vertices.push(y + -rad); //y
-  vertices.push(z + -rad); //z
+    vertices.push(x - rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z + rad); //z
 
-  vertices.push(x + rad); //x
-  vertices.push(y + rad); //y
-  vertices.push(z + rad); //z
+    // Back Face
+    vertices.push(x - rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z - rad); //z
 
-  vertices.push(x + -rad); //x
-  vertices.push(y + rad); //y
-  vertices.push(z + rad); //z
+    vertices.push(x - rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z - rad); //z
 
-  vertices.push(x + -rad); //x
-  vertices.push(y + -rad); //y
-  vertices.push(z + rad); //z
+    vertices.push(x + rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z - rad); //z
 
-  vertices.push(x + rad);   //x
-  vertices.push(y + -rad);  //y
-  vertices.push(z + rad);   //z
+    vertices.push(x + rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z - rad); //z
 
-  normals = [
-    // Front face
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
-    0.0, 0.0, 1.0,
+    // Top Face
+    vertices.push(x - rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z - rad); //z
 
-    // Back face
-    0.0, 0.0, -1.0,
-    0.0, 0.0, -1.0,
-    0.0, 0.0, -1.0,
-    0.0, 0.0, -1.0,
+    vertices.push(x - rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z + rad); //z
 
-    // Top face
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 1.0, 0.0,
+    vertices.push(x + rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z + rad); //z
 
-    // Bottom face
-    0.0, -1.0, 0.0,
-    0.0, -1.0, 0.0,
-    0.0, -1.0, 0.0,
-    0.0, -1.0, 0.0,
+    vertices.push(x + rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z - rad); //z
 
-    // Right face
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
-    1.0, 0.0, 0.0,
+    // Bottom Face
+    vertices.push(x - rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z - rad); //z
 
-    // Left face
-    -1.0, 0.0, 0.0,
-    -1.0, 0.0, 0.0,
-    -1.0, 0.0, 0.0,
-    -1.0, 0.0, 0.0,
-  ];
-  // Add the vertex indices
-  indices = [0, 1, 2, 0, 2, 3, 0, 3, 7, 0, 7, 4, 6, 2, 3, 6, 3, 7,
-    5, 1, 2, 5, 2, 6, 5, 1, 0, 5, 0, 4, 5, 6, 7, 5, 7, 4
-  ];
-  // Add the vertex colors
-  for (var i = 0; i < 8; i++) {
-    colors = colors.concat(color);
-  }
+    vertices.push(x + rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z - rad); //z
 
-  // Create Buffer Objects
-  cube.vertex_position_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, cube.vertex_position_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  cube.vertex_position_buffer.itemSize = 3;
-  cube.vertex_position_buffer.numItems = num_vertices;
+    vertices.push(x + rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z + rad); //z
 
-  cube.vertex_index_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.vertex_index_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-  cube.vertex_index_buffer.itemSize = 1;
-  cube.vertex_index_buffer.numItems = num_indices;
+    vertices.push(x - rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z + rad); //z
 
-  cube.vertex_normal_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.vertex_normal_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-  cube.vertex_normal_buffer.itemSize = 3;
-  cube.vertex_normal_buffer.numItems = 24;
+    // Right Face
+    vertices.push(x + rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z - rad); //z
 
-  cube.vertex_color_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, cube.vertex_color_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-  cube.vertex_color_buffer.itemSize = 4;
-  cube.vertex_color_buffer.numItems = num_colors;
+    vertices.push(x + rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z - rad); //z
 
-  return cube;
+    vertices.push(x + rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z + rad); //z
+
+    vertices.push(x + rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z + rad); //z
+
+    // Left Face
+    vertices.push(x - rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z - rad); //z
+
+    vertices.push(x - rad); //x
+    vertices.push(y - rad); //y
+    vertices.push(z + rad); //z
+
+    vertices.push(x - rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z + rad); //z
+
+    vertices.push(x - rad); //x
+    vertices.push(y + rad); //y
+    vertices.push(z - rad); //z
+
+    normals = [
+        // Front face
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+        0.0, 0.0, 1.0,
+
+        // Back face
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+        0.0, 0.0, -1.0,
+
+        // Top face
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 1.0, 0.0,
+
+        // Bottom face
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, -1.0, 0.0,
+
+        // Right face
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+
+        // Left face
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+        -1.0, 0.0, 0.0,
+    ];
+    // Add the vertex indices
+    indices = [ 0, 1, 2, 0, 2, 3,       // Front face
+                4, 5, 6, 4, 6, 7,       // Back face
+                8, 9, 10, 8, 10, 11,    // Top face
+                12, 13, 14, 12, 14, 15, // Bottom face
+                16, 17, 18, 16, 18, 19, // Right face
+                20, 21, 22, 20, 22, 23  // Left face
+    ];
+    // Add the vertex colors
+    for (var i = 0; i < 24; i++) {
+        colors = colors.concat(color);
+    }
+
+    // Create Buffer Objects
+    cube.vertex_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cube.vertex_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    cube.vertex_position_buffer.itemSize = 3;
+    cube.vertex_position_buffer.numItems = 24;
+
+    cube.vertex_index_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.vertex_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    cube.vertex_index_buffer.itemSize = 1;
+    cube.vertex_index_buffer.numItems = 36;
+
+    cube.vertex_normal_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cube.vertex_normal_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+    cube.vertex_normal_buffer.itemSize = 3;
+    cube.vertex_normal_buffer.numItems = 24;
+
+    cube.vertex_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cube.vertex_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    cube.vertex_color_buffer.itemSize = 4;
+    cube.vertex_color_buffer.numItems = 24;
+
+    return cube;
 }
 
 // Return a cylinder with the bottom centered at x,y,z
 // num_stacks : the resolution of circles
 function createCylinder(x, y, z, rad, height, color, num_stacks, num_slices) {
-  // Initialize the tranformation matrix
-  mat = mat4.create();
-  mat4.identity(mat);
+    // Initialize the tranformation matrix
+    mat = mat4.create();
+    mat4.identity(mat);
 
-  var cylinder = {
-    matrix: mat,
-    vertex_position_buffer: {},
-    vertex_index_buffer: {},
-    vertex_normal_buffer: {},
-    vertex_color_buffer: {}
-  };
+    var cylinder = {
+        matrix: mat,
+        vertex_position_buffer: {},
+        vertex_index_buffer: {},
+        vertex_normal_buffer: {},
+        vertex_color_buffer: {}
+    };
 
-  var vertices = [];
-  var indices = [];
-  var colors = [];
-  var normals = [];
-  var num_vertices = num_slices * num_stacks;
+    var vertices = [];
+    var indices = [];
+    var colors = [];
+    var normals = [];
+    var num_vertices = num_slices * num_stacks;
 
-  var d_angle = 2 * Math.PI / (num_slices - 1);
+    var d_angle = 2 * Math.PI / (num_slices - 1);
 
-  for (j = 0; j < num_stacks; j++)
-    for (i = 0; i < num_slices; i++) {
-      var idx = j * num_slices + i;
-      var angle = d_angle * i;
-      vertices.push(x + rad * Math.cos(angle));
-      vertices.push(y + rad * Math.sin(angle));
-      vertices.push(z + j * height / (num_stacks - 1));
+    for (j = 0; j < num_stacks; j++)
+        for (i = 0; i < num_slices; i++) {
+            var idx = j * num_slices + i;
+            var angle = d_angle * i;
+            vertices.push(x + rad * Math.cos(angle));
+            vertices.push(y + rad * Math.sin(angle));
+            vertices.push(z + j * height / (num_stacks - 1));
 
-      normals.push(Math.cos(angle));
-      normals.push(Math.sin(angle));
-      normals.push(0.0);
+            normals.push(Math.cos(angle));
+            normals.push(Math.sin(angle));
+            normals.push(0.0);
 
-      colors = colors.concat(color);
-    }
-  // now create the index array
+            colors = colors.concat(color);
+        }
+    // now create the index array
 
-  num_indices = (num_stacks - 1) * 6 * (num_slices + 1);
+    num_indices = (num_stacks - 1) * 6 * (num_slices + 1);
 
-  for (j = 0; j < num_stacks - 1; j++)
-    for (i = 0; i <= num_slices; i++) {
-      var mi = i % num_slices;
-      var mi2 = (i + 1) % num_slices;
-      indices.push((j + 1) * num_slices + mi);
-      indices.push(j * num_slices + mi); // mesh[j][mi]
-      indices.push((j) * num_slices + mi2);
-      indices.push((j + 1) * num_slices + mi);
-      indices.push((j) * num_slices + mi2);
-      indices.push((j + 1) * num_slices + mi2);
-    }
+    for (j = 0; j < num_stacks - 1; j++)
+        for (i = 0; i <= num_slices; i++) {
+            var mi = i % num_slices;
+            var mi2 = (i + 1) % num_slices;
+            indices.push((j + 1) * num_slices + mi);
+            indices.push(j * num_slices + mi); // mesh[j][mi]
+            indices.push((j) * num_slices + mi2);
+            indices.push((j + 1) * num_slices + mi);
+            indices.push((j) * num_slices + mi2);
+            indices.push((j + 1) * num_slices + mi2);
+        }
 
-  // Initialize the cylinders vertex and color buffer objects
-  cylinder.vertex_position_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, cylinder.vertex_position_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  cylinder.vertex_position_buffer.itemSize = 3;
-  cylinder.vertex_position_buffer.numItems = num_vertices;
+    // Initialize the cylinders vertex and color buffer objects
+    cylinder.vertex_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder.vertex_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    cylinder.vertex_position_buffer.itemSize = 3;
+    cylinder.vertex_position_buffer.numItems = num_vertices;
 
-  cylinder.vertex_index_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinder.vertex_index_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-  cylinder.vertex_index_buffer.itemSize = 1;
-  cylinder.vertex_index_buffer.numItems = num_indices;
-  //
-  cylinder.vertex_normal_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinder.vertex_normal_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-  cylinder.vertex_normal_buffer.itemSize = 3;
-  cylinder.vertex_normal_buffer.numItems = num_vertices;
+    cylinder.vertex_index_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinder.vertex_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    cylinder.vertex_index_buffer.itemSize = 1;
+    cylinder.vertex_index_buffer.numItems = num_indices;
+    //
+    cylinder.vertex_normal_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinder.vertex_normal_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+    cylinder.vertex_normal_buffer.itemSize = 3;
+    cylinder.vertex_normal_buffer.numItems = num_vertices;
 
-  cylinder.vertex_color_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, cylinder.vertex_color_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-  cylinder.vertex_color_buffer.itemSize = 4;
-  cylinder.vertex_color_buffer.numItems = num_vertices;
+    cylinder.vertex_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, cylinder.vertex_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    cylinder.vertex_color_buffer.itemSize = 4;
+    cylinder.vertex_color_buffer.numItems = num_vertices;
 
-  return cylinder;
+    return cylinder;
 }
 
 function createSphere(x, y, z, rad, color, num_stacks, num_slices) {
-  mat = mat4.create();
-  mat4.identity(mat);
+    mat = mat4.create();
+    mat4.identity(mat);
 
-  var sphere = {
-    matrix: mat,
-    vertex_position_buffer: {},
-    vertex_index_buffer: {},
-    vertex_color_buffer: {},
-  };
+    var sphere = {
+        matrix: mat,
+        vertex_position_buffer: {},
+        vertex_index_buffer: {},
+        vertex_color_buffer: {},
+    };
 
-  var vertices = [];
-  var indices = [];
-  var normals = [];
-  var colors = [];
-  var num_vertices = num_slices + 1;
-  var num_indices = num_slices * num_stacks * 6;
-  var num_colors = num_slices + 1;
+    var vertices = [];
+    var indices = [];
+    var normals = [];
+    var colors = [];
+    var num_vertices = num_slices + 1;
+    var num_indices = num_slices * num_stacks * 6;
+    var num_colors = num_slices + 1;
 
-  for (var horizontal_num = 0; horizontal_num <= num_stacks; horizontal_num++) {
-    var horizontal_rad = horizontal_num * Math.PI / num_stacks;
+    for (var horizontal_num = 0; horizontal_num <= num_stacks; horizontal_num++) {
+        var horizontal_rad = horizontal_num * Math.PI / num_stacks;
 
-    for (var vertical_num = 0; vertical_num <= num_slices; vertical_num++) {
-      var vertical_rad = vertical_num * 2 * Math.PI / num_slices;
-      var x1 = Math.cos(vertical_rad) * Math.sin(horizontal_rad);
-      var y1 = Math.cos(horizontal_rad);
-      var z1 = Math.sin(vertical_rad) * Math.sin(horizontal_rad);
+        for (var vertical_num = 0; vertical_num <= num_slices; vertical_num++) {
+            var vertical_rad = vertical_num * 2 * Math.PI / num_slices;
+            var x1 = Math.cos(vertical_rad) * Math.sin(horizontal_rad);
+            var y1 = Math.cos(horizontal_rad);
+            var z1 = Math.sin(vertical_rad) * Math.sin(horizontal_rad);
 
-      vertices.push(x + rad * x1);
-      vertices.push(y + rad * y1);
-      vertices.push(z + rad * z1);
-      normals.push(-x1)
-      normals.push(-y1)
-      normals.push(-z1)
-      colors = colors.concat(color);
+            vertices.push(x + rad * x1);
+            vertices.push(y + rad * y1);
+            vertices.push(z + rad * z1);
+            normals.push(x1);
+            normals.push(y1);
+            normals.push(z1);
+            colors = colors.concat(color);
+        }
     }
-  }
 
-  for (var horizontal_num = 0; horizontal_num < num_stacks; horizontal_num++) {
-    for (var vertical_num = 0; vertical_num < num_slices; vertical_num++) {
-      var v1 = (horizontal_num * (num_slices + 1)) + vertical_num;
-      var v2 = v1 + num_slices + 1;
-      indices.push(v1);
-      indices.push(v2);
-      indices.push(v1 + 1);
+    for (var horizontal_num = 0; horizontal_num < num_stacks; horizontal_num++) {
+        for (var vertical_num = 0; vertical_num < num_slices; vertical_num++) {
+            var v1 = (horizontal_num * (num_slices + 1)) + vertical_num;
+            var v2 = v1 + num_slices + 1;
+            indices.push(v1);
+            indices.push(v2);
+            indices.push(v1 + 1);
 
-      indices.push(v2);
-      indices.push(v2 + 1);
-      indices.push(v1 + 1);
+            indices.push(v2);
+            indices.push(v2 + 1);
+            indices.push(v1 + 1);
+        }
     }
-  }
 
-  sphere.vertex_position_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, sphere.vertex_position_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  sphere.vertex_position_buffer.itemSize = 3;
-  sphere.vertex_position_buffer.numItems = num_vertices;
+    sphere.vertex_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphere.vertex_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    sphere.vertex_position_buffer.itemSize = 3;
+    sphere.vertex_position_buffer.numItems = num_vertices;
 
-  sphere.vertex_index_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphere.vertex_index_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-  sphere.vertex_index_buffer.itemSize = 1;
-  sphere.vertex_index_buffer.numItems = num_indices;
+    sphere.vertex_index_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphere.vertex_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    sphere.vertex_index_buffer.itemSize = 1;
+    sphere.vertex_index_buffer.numItems = num_indices;
 
-  sphere.vertex_normal_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphere.vertex_normal_buffer);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-  sphere.vertex_normal_buffer.itemSize = 3;
-  sphere.vertex_normal_buffer.numItems = num_vertices;
+    sphere.vertex_normal_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphere.vertex_normal_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+    sphere.vertex_normal_buffer.itemSize = 3;
+    sphere.vertex_normal_buffer.numItems = num_vertices;
 
-  sphere.vertex_color_buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, sphere.vertex_color_buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-  sphere.vertex_color_buffer.itemSize = 4;
-  sphere.vertex_color_buffer.numItems = num_colors;
+    sphere.vertex_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphere.vertex_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    sphere.vertex_color_buffer.itemSize = 4;
+    sphere.vertex_color_buffer.numItems = num_colors;
 
-  return sphere;
+    return sphere;
 }
