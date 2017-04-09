@@ -1,21 +1,21 @@
 /**
- * Date: 2/23/2017
+ * Date: 4/9/2017
  * Author: Zach Peugh
  * Class: CSE 5542
- * Assignment: Lab 3
+ * Assignment: Lab 4
  * Description: Extra utility functions used by other main functions
  **/
 const LEFT = 37;
 const RIGHT = 39;
 const DOWN = 40;
 const UP = 38;
-const PANE_LEFT = 65;
-const PANE_RIGHT = 68;
-const PANE_DOWN = 83;
-const PANE_UP = 87;
-const Z_UP = 88;
-const Z_DOWN = 90;
-const PANE_SPEED = 1;
+const LIGHT_LEFT = 65;
+const LIGHT_RIGHT = 68;
+const LIGHT_DOWN = 83;
+const LIGHT_UP = 87;
+const LIGHT_FORWARD = 88;
+const LIGHT_BACKWARD = 90;
+const LIGHT_SPEED = 1;
 const SHIFT = 16;
 const ENTER = 13;
 const PAUSE = 80;
@@ -32,7 +32,7 @@ function setMatrixUniforms() {
     nMatrix = mat4.inverse(nMatrix);
     nMatrix = mat4.transpose(nMatrix);
     gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);
-    
+
 }
 
 function degToRad(degrees) {
@@ -40,120 +40,19 @@ function degToRad(degrees) {
 }
 
 
-function changeDirection(dir) {
-    switch (dir.toLowerCase()) {
-        case "left":
-            if (DIRECTION == POS_X) {
-                DIRECTION = NEG_Z;
-            } else if (DIRECTION == NEG_Z) {
-                DIRECTION = NEG_X;
-            } else if (DIRECTION == NEG_X) {
-                DIRECTION = POS_Z;
-            } else if (DIRECTION == POS_Z) {
-                DIRECTION = POS_X;
+function changeLightIntensity(up_or_down){
+    switch (up_or_down){
+        case "UP":
+            if (light_intensity < 3){
+                light_intensity += 0.01;
             }
-            movementMatrix = mat4.rotate(movementMatrix, degToRad(90), [0, 1, 0]);
-            console.log(DIRECTION);
             break;
-        case "right":
-            if (DIRECTION == POS_X) {
-                DIRECTION = POS_Z;
-            } else if (DIRECTION == NEG_Z) {
-                DIRECTION = POS_X;
-            } else if (DIRECTION == NEG_X) {
-                DIRECTION = NEG_Z;
-            } else if (DIRECTION == POS_Z) {
-                DIRECTION = NEG_X;
+        case "DOWN":
+            if (light_intensity > 0.51){
+                light_intensity -= 0.01;
             }
-            movementMatrix = mat4.rotate(movementMatrix, degToRad(-90), [0, 1, 0]);
-            console.log(DIRECTION);
             break;
-        default:
-            console.log("Invalid direction");
-            return;
     }
-}
-
-
-function moveRobot(direction) {
-    switch (direction.toLowerCase()) {
-        case "back":
-            changeDirection("left");
-            changeDirection("left");
-            break;
-        case "forward":
-            movementMatrix = mat4.translate(movementMatrix, [0, 0, .15]);
-            break;
-        case "left":
-            changeDirection("left");
-            break;
-        case "right":
-            changeDirection("right");
-            break;
-        default:
-            console.log("Invalid direction");
-            return;
-    }
-    drawScene();
-}
-
-function armDance1() {
-    var up_axis = [1, 0, 0];
-    var side_axis = [0, 0, 1];
-
-    left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(-45), up_axis);
-    right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(-45), up_axis);
-    drawScene();
-
-    window.setTimeout(function() {
-        console.log("move down");
-        left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(45), up_axis);
-        right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(45), up_axis);
-        drawScene();
-    }, 400);
-
-    window.setTimeout(function() {
-        console.log("move out");
-        right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(45), side_axis);
-        left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(-45), side_axis);
-        drawScene();
-    }, 700);
-
-    window.setTimeout(function() {
-        console.log("move back together");
-        right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(-45), side_axis);
-        left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(45), side_axis);
-        drawScene();
-    }, 1100);
-}
-
-function armDance2() {
-    var up_axis = [1, 0, 0];
-
-    left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(-45), up_axis);
-    right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(45), up_axis);
-    drawScene();
-
-    window.setTimeout(function() {
-        console.log("move down");
-        left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(45), up_axis);
-        right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(-45), up_axis);
-        drawScene();
-    }, 400);
-
-    window.setTimeout(function() {
-        console.log("move out");
-        right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(45), up_axis);
-        left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(-45), up_axis);
-        drawScene();
-    }, 700);
-
-    window.setTimeout(function() {
-        console.log("move back together");
-        right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(-45), up_axis);
-        left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(45), up_axis);
-        drawScene();
-    }, 1100);
 }
 
 function updateLightPosition(pos, light_change) {
@@ -177,50 +76,37 @@ function updateLightPosition(pos, light_change) {
 }
     function keypressHandler(key) {
         switch (key.which) {
-            case LEFT:
-                moveRobot("left");
+            case LIGHT_RIGHT:
+                updateLightPosition("X", LIGHT_SPEED)
+                drawScene();
                 break;
-            case RIGHT:
-                moveRobot("right");
+            case LIGHT_LEFT:
+                updateLightPosition("X", -LIGHT_SPEED)
+                drawScene();
                 break;
-            case DOWN:
-                moveRobot("back");
+            case LIGHT_UP:
+                updateLightPosition("Y", LIGHT_SPEED)
+                drawScene();
+                break;
+            case LIGHT_DOWN:
+                updateLightPosition("Y", -LIGHT_SPEED)
+                drawScene();
+                break;
+            case LIGHT_FORWARD:
+                updateLightPosition("Z", LIGHT_SPEED)
+                drawScene();
+                break;
+            case LIGHT_BACKWARD:
+                updateLightPosition("Z", -LIGHT_SPEED)
+                drawScene();
                 break;
             case UP:
-                moveRobot("forward");
-                break;
-            case PANE_RIGHT:
-                updateLightPosition("X", PANE_SPEED)
+                changeLightIntensity("UP");
                 drawScene();
                 break;
-            case PANE_LEFT:
-                updateLightPosition("X", -PANE_SPEED)
+            case DOWN:
+                changeLightIntensity("DOWN");
                 drawScene();
-                break;
-            case PANE_UP:
-                updateLightPosition("Y", PANE_SPEED)
-                drawScene();
-                break;
-            case PANE_DOWN:
-                updateLightPosition("Y", -PANE_SPEED)
-                drawScene();
-                break;
-            case Z_UP:
-                updateLightPosition("Z", PANE_SPEED)
-                drawScene();
-                break;
-            case Z_DOWN:
-                updateLightPosition("Z", -PANE_SPEED)
-                drawScene();
-                break;
-            case ENTER:
-                if (key.shiftKey) {
-                    armDance1();
-                } else {
-                    armDance2();
-                }
-                break;
-            case SHIFT:
                 break;
             default:
                 console.log("Invalid keypress: " + key.which);

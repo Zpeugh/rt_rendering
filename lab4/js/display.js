@@ -1,28 +1,23 @@
 /**
- * Date: 3/15/2017
+ * Date: 4/9/2017
  * Author: Zach Peugh
  * Class: CSE 5542
- * Assignment: Lab 3
+ * Assignment: Lab 4
  * Description: Main file containing all of the public facing
- *              function definitions for lab 2.
+ *              function definitions for lab 4.
  **/
 
 // Initialize all global variables
 var Z_ANGLE = 0.0;
 var FOV_ANGLE = 45.0;
 var CAMERA_X = 0;
-var CAMERA_Y = 18;
-var CAMERA_Z = 25;
+var CAMERA_Y = 14;
+var CAMERA_Z = 22;
 var LIGHT_X = 0;
 var LIGHT_Y = 5;
 var LIGHT_Z = 0;
 const LIGHTGREY = [0.9, 0.9, 0.9, 1];
 const WHITE = [1, 1, 1, 1];
-const POS_X = 1;
-const POS_Z = 2;
-const NEG_X = 3;
-const NEG_Z = 4;
-var DIRECTION = POS_X;
 var gl;
 var shaderProgram;
 var draw_type = 2;
@@ -37,7 +32,6 @@ var left_arm = {};
 var right_arm = {};
 var bottom = {};
 var light_bulb = {};
-var movementMatrix = mat4.create();
 var vMatrix = mat4.create();    // view matrix
 var mMatrix = mat4.create();    // model matrixs
 var mvMatrix = mat4.create();   // modelview matrix
@@ -47,11 +41,7 @@ var light_pos = [LIGHT_X, LIGHT_Y, LIGHT_Z, 1]; // world space position
 var ambient_color = WHITE;
 var diffuse_color = WHITE;
 var specular_color = WHITE;
-var mat_ambient = [0.4, 0.4, 0.4, 1];
-var mat_diffuse = [0.4, 0.4, 0.4, 1];
-var mat_specular = [.2, .2, .2, 1];
-var shininess = 64;
-
+var light_intensity = 1;
 
 function initGL(canvas) {
     try {
@@ -79,12 +69,12 @@ function drawObject(object, triangle_type) {
 
     mat4.multiply(mvMatrix, object.matrix, mvMatrix);
 
-    // shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
     gl.uniform4f(shaderProgram.light_posUniform, light_pos[0], light_pos[1], light_pos[2], light_pos[3]);
-    gl.uniform4f(shaderProgram.ambient_coefUniform, mat_ambient[0], mat_ambient[1], mat_ambient[2], 1.0);
-    gl.uniform4f(shaderProgram.diffuse_coefUniform, mat_diffuse[0], mat_diffuse[1], mat_diffuse[2], 1.0);
-    gl.uniform4f(shaderProgram.specular_coefUniform, mat_specular[0], mat_specular[1], mat_specular[2], 1.0);
-    gl.uniform1f(shaderProgram.shininessUniform, shininess);
+    gl.uniform4f(shaderProgram.ambient_coefUniform, object.ambient_coef, object.ambient_coef, object.ambient_coef, 1.0);
+    gl.uniform4f(shaderProgram.diffuse_coefUniform, object.diffuse_coef, object.diffuse_coef, object.diffuse_coef, 1.0);
+    gl.uniform4f(shaderProgram.specular_coefUniform, object.specular_coef, object.specular_coef, object.specular_coef, 1.0);
+    gl.uniform1f(shaderProgram.shininessUniform, object.shininess);
+    gl.uniform1f(shaderProgram.light_intensityUniform, light_intensity);
 
     gl.uniform4f(shaderProgram.ambient_colorUniform, ambient_color[0], ambient_color[1], ambient_color[2], 1.0);
     gl.uniform4f(shaderProgram.diffuse_colorUniform, diffuse_color[0], diffuse_color[1], diffuse_color[2], 1.0);
@@ -118,18 +108,27 @@ function drawObject(object, triangle_type) {
 }
 
 function initializeRoom(){
-    floor = createPlane(0,0,0,8,0.15,8,LIGHTGREY);
-    right_wall = createPlane(7.85,4,0,0.15,4,8,LIGHTGREY);
-    left_wall = createPlane(-7.85,4,0,0.15,4,8,LIGHTGREY);
-    back_wall = createPlane(0,4,-8,8,4,0.15,LIGHTGREY);
+    var ambient = 0.4;
+    var diffuse = 0.5;
+    var spec = 0.5;
+    var shine = 64;
+    var color = LIGHTGREY;
+    floor = createPlane(0,0,0,8,0.15,8,color,ambient,diffuse,spec,shine);
+    // right_wall = createPlane(7.85,4,0,0.15,4,8,color,ambient,diffuse,spec,shine);
+    // left_wall = createPlane(-7.85,4,0,0.15,4,8,color,ambient,diffuse,spec,shine);
+    // back_wall = createPlane(0,4,-8,8,4,0.15,color,ambient,diffuse,spec,shine);
 }
 
 function initializeRobot(x, y, z){
-    body = createCube(x+0,y+1.5,z,0.5,BLUE);
-    left_arm = createCylinder(x+-0.25, y+1.5, z+0.45, 0.1, 0.75, GREEN, 50, 100);
-    right_arm = createCylinder(x+0.25, y+1.5, z+0.45, 0.1, 0.75, GREEN, 50, 100);
-    head = createCube(x+0,y+2.25,z,0.25,[1,0,0,1]);
-    bottom = createSphere(x+0, y+0.5, z, 0.5, [1,0,0,1], 50, 100);
+    var ambient = 0.4;
+    var diffuse = 0.5;
+    var spec = 0.5;
+    var shine = 50;
+    body = createCube(x+0,y+1.5,z,0.5,BLUE,ambient,diffuse,spec,shine);
+    left_arm = createCylinder(x+-0.25, y+1.5, z+0.45, 0.1, 0.75, GREEN, 50, 100,ambient,diffuse,spec,shine);
+    right_arm = createCylinder(x+0.25, y+1.5, z+0.45, 0.1, 0.75, GREEN, 50, 100,ambient,diffuse,spec,shine);
+    head = createCube(x+0,y+2.25,z,0.25,[1,0,0,1],ambient,diffuse,spec,shine);
+    bottom = createSphere(x+0, y+0.5, z, 0.5, [1,0,0,1], 50, 100,ambient,diffuse,spec,shine);
 }
 
 
@@ -155,6 +154,7 @@ function webGLStart() {
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNMatrix");
     shaderProgram.light_posUniform = gl.getUniformLocation(shaderProgram, "light_pos");
+    shaderProgram.light_intensityUniform = gl.getUniformLocation(shaderProgram, "light_intensity");
     shaderProgram.ambient_coefUniform = gl.getUniformLocation(shaderProgram, "ambient_coef");
     shaderProgram.diffuse_coefUniform = gl.getUniformLocation(shaderProgram, "diffuse_coef");
     shaderProgram.specular_coefUniform = gl.getUniformLocation(shaderProgram, "specular_coef");
@@ -163,11 +163,9 @@ function webGLStart() {
     shaderProgram.diffuse_colorUniform = gl.getUniformLocation(shaderProgram, "diffuse_color");
     shaderProgram.specular_colorUniform = gl.getUniformLocation(shaderProgram, "specular_color");
 
-    mat4.identity(movementMatrix);
-
-    light_bulb = createSphere(LIGHT_X, LIGHT_Y, LIGHT_Z, 0.15, WHITE, 50, 100);
+    light_bulb = createSphere(LIGHT_X, LIGHT_Y, LIGHT_Z, 0.15, WHITE, 50, 100, 1, 1, 1, 1);
     initializeRoom();
-    initializeRobot(-4,0,0);
+    initializeRobot(0,0,0);
 
     $(document).keydown(keypressHandler);
 
@@ -186,12 +184,12 @@ function drawScene() {
     drawObject(light_bulb, "TRIANGLES");
     mvMatrix = setMVmatrix();
     drawObject(floor, "TRIANGLES");
-    mvMatrix = setMVmatrix();
-    drawObject(right_wall, "TRIANGLES");
-    mvMatrix = setMVmatrix();
-    drawObject(left_wall, "TRIANGLES");
-    mvMatrix = setMVmatrix();
-    drawObject(back_wall, "TRIANGLES");
+    // mvMatrix = setMVmatrix();
+    // drawObject(right_wall, "TRIANGLES");
+    // mvMatrix = setMVmatrix();
+    // drawObject(left_wall, "TRIANGLES");
+    // mvMatrix = setMVmatrix();
+    // drawObject(back_wall, "TRIANGLES");
     mvMatrix = setMVmatrix();
     drawObject(bottom, "TRIANGLES");
     drawObject(body, "TRIANGLES");

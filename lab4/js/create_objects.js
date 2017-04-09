@@ -7,15 +7,8 @@
  **/
 const GREEN = [0.329, 0.686, 0.196, 1];
 const BLUE = [0.274, 0.533, 0.7725, 1];
-var CUBE_COLOR_1 = [0.274, 0.533, 0.9, 1];
-var CUBE_COLOR_2 = [0.274, 0.533, 0.65, 1];
-const color = [0.329, 0.686, 0.196, 1];
-const SPHERE_COLOR = [0.86, 0.12, 0.196, 1];
-const SPHERE_RADIUS = 0.5;
-const SPHERE_CENTER_Y = 0;
-const SPHERE_CENTER_Z = -6;
 
-function createPlane(x, y, z, length, width, thickness, color){
+function createPlane(x, y, z, length, width, thickness, color, ambient_coef, diffuse_coef, specular_coef, shininess){
     mat = mat4.create();
     mat4.identity(mat);
 
@@ -24,7 +17,11 @@ function createPlane(x, y, z, length, width, thickness, color){
         vertex_position_buffer: {},
         vertex_index_buffer: {},
         vertex_normal_buffer: {},
-        vertex_color_buffer: {}
+        vertex_color_buffer: {},
+        ambient_coef: ambient_coef,
+        diffuse_coef: diffuse_coef,
+        specular_coef: specular_coef,
+        shininess: shininess
     };
 
     var vertices = [];
@@ -213,103 +210,7 @@ function createPlane(x, y, z, length, width, thickness, color){
     return plane;
 }
 
-//
-// function createPlane(x, y, z, length, width, thickness, color) {
-//     mat = mat4.create();
-//     mat4.identity(mat);
-//
-//     var plane = {
-//         matrix: mat,
-//         vertex_position_buffer: {},
-//         vertex_index_buffer: {},
-//         vertex_normal_buffer: {},
-//         vertex_color_buffer: {}
-//     };
-//
-//     var vertices = [];
-//     var indices = [];
-//     var normals = [];
-//     var colors = [];
-//     var num_vertices = 8;
-//     var num_indices = 36;
-//     var num_colors = 8;
-//
-//     // Draw the vertices
-//     vertices.push(x + width); //x
-//     vertices.push(y + thickness); //y
-//     vertices.push(z + -length); //z
-//
-//     vertices.push(x + -width); //x
-//     vertices.push(y + thickness); //y
-//     vertices.push(z + -length); //z
-//
-//     vertices.push(x + -width); //x
-//     vertices.push(y + -thickness); //y
-//     vertices.push(z + -length); //z
-//
-//     vertices.push(x + width); //x
-//     vertices.push(y + -thickness); //y
-//     vertices.push(z + -length); //z
-//
-//     vertices.push(x + width); //x
-//     vertices.push(y + thickness); //y
-//     vertices.push(z + length); //z
-//
-//     vertices.push(x + -width); //x
-//     vertices.push(y + thickness); //y
-//     vertices.push(z + length); //z
-//
-//     vertices.push(x + -width); //x
-//     vertices.push(y + -thickness); //y
-//     vertices.push(z + length); //z
-//
-//     vertices.push(x + width); //x
-//     vertices.push(y + -thickness); //y
-//     vertices.push(z + length); //z
-//
-//     // Add the vertex indices
-//     indices = [0, 1, 2, 0, 2, 3, 0, 3, 7, 0, 7, 4, 6, 2, 3, 6, 3, 7,
-//         5, 1, 2, 5, 2, 6, 5, 1, 0, 5, 0, 4, 5, 6, 7, 5, 7, 4
-//     ];
-//     // Add the vertex colors
-//     for (var i = 0; i < 8; i++) {
-//         colors = colors.concat(color);
-//     }
-//     normals.push(0.0);
-//     normals.push(1.0);
-//     normals.push(0.0);
-//
-//     // Create Buffer Objects
-//     plane.vertex_position_buffer = gl.createBuffer();
-//     gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_position_buffer);
-//     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-//     plane.vertex_position_buffer.itemSize = 3;
-//     plane.vertex_position_buffer.numItems = num_vertices;
-//
-//     plane.vertex_index_buffer = gl.createBuffer();
-//     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_index_buffer);
-//     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-//     plane.vertex_index_buffer.itemSize = 1;
-//     plane.vertex_index_buffer.numItems = num_indices;
-//
-//     plane.vertex_normal_buffer = gl.createBuffer();
-//     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, plane.vertex_normal_buffer);
-//     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-//     plane.vertex_normal_buffer.itemSize = 3;
-//     plane.vertex_normal_buffer.numItems = 1;
-//
-//     plane.vertex_color_buffer = gl.createBuffer();
-//     gl.bindBuffer(gl.ARRAY_BUFFER, plane.vertex_color_buffer);
-//     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-//     plane.vertex_color_buffer.itemSize = 4;
-//     plane.vertex_color_buffer.numItems = num_colors;
-//
-//     return plane;
-// }
-//
-
-
-function createCube(x, y, z, rad, color) {
+function createCube(x, y, z, rad, color, ambient_coef, diffuse_coef, specular_coef, shininess) {
     mat = mat4.create();
     mat4.identity(mat);
 
@@ -318,7 +219,11 @@ function createCube(x, y, z, rad, color) {
         vertex_position_buffer: {},
         vertex_index_buffer: {},
         vertex_normal_buffer: {},
-        vertex_color_buffer: {}
+        vertex_color_buffer: {},
+        ambient_coef: ambient_coef,
+        diffuse_coef: diffuse_coef,
+        specular_coef: specular_coef,
+        shininess: shininess
     };
 
     var vertices = [];
@@ -509,7 +414,7 @@ function createCube(x, y, z, rad, color) {
 
 // Return a cylinder with the bottom centered at x,y,z
 // num_stacks : the resolution of circles
-function createCylinder(x, y, z, rad, height, color, num_stacks, num_slices) {
+function createCylinder(x, y, z, rad, height, color, num_stacks, num_slices, ambient_coef, diffuse_coef, specular_coef, shininess) {
     // Initialize the tranformation matrix
     mat = mat4.create();
     mat4.identity(mat);
@@ -519,7 +424,11 @@ function createCylinder(x, y, z, rad, height, color, num_stacks, num_slices) {
         vertex_position_buffer: {},
         vertex_index_buffer: {},
         vertex_normal_buffer: {},
-        vertex_color_buffer: {}
+        vertex_color_buffer: {},
+        ambient_coef: ambient_coef,
+        diffuse_coef: diffuse_coef,
+        specular_coef: specular_coef,
+        shininess: shininess
     };
 
     var vertices = [];
@@ -588,7 +497,7 @@ function createCylinder(x, y, z, rad, height, color, num_stacks, num_slices) {
     return cylinder;
 }
 
-function createSphere(x, y, z, rad, color, num_stacks, num_slices) {
+function createSphere(x, y, z, rad, color, num_stacks, num_slices, ambient_coef, diffuse_coef, specular_coef, shininess) {
     mat = mat4.create();
     mat4.identity(mat);
 
@@ -597,6 +506,10 @@ function createSphere(x, y, z, rad, color, num_stacks, num_slices) {
         vertex_position_buffer: {},
         vertex_index_buffer: {},
         vertex_color_buffer: {},
+        ambient_coef: ambient_coef,
+        diffuse_coef: diffuse_coef,
+        specular_coef: specular_coef,
+        shininess: shininess
     };
 
     var vertices = [];

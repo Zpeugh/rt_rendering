@@ -1,9 +1,9 @@
 <!--
-  * Date: 3/15/2017
+  * Date: 4/9/2017
   * Author: Zach Peugh
   * Class: CSE 5542
-  * Assignment: Lab 3
-  * Desciption: Main html file for lab 3
+  * Assignment: Lab 4
+  * Desciption: Main html file for lab 4
 -->
 
 <!DOCTYPE html>
@@ -22,11 +22,11 @@
     <script id="shader-fs" type="x-shader/x-fragment">
       precision mediump float;
 
-      // uniform vec4 light_pos;
       uniform vec4 ambient_coef;
       uniform vec4 diffuse_coef;
       uniform vec4 specular_coef;
       uniform float shininess;
+      uniform float light_intensity;
 
       uniform vec4 ambient_color;
       uniform vec4 diffuse_color;
@@ -55,28 +55,9 @@
         if (n_dot_l > 0.0)
             specular = specular_coef * spec * specular_color;
 
-        //   // Calculate reflection direction
-        //   vec3 reflect_dir = reflect(-light_dir, normal_in_eye);
+        // Combined fragment color
+        gl_FragColor = (ambient + diffuse + specular) * object_color * light_intensity;
 
-        //   // Calculate view direction
-        //   vec3 view_dir = normalize(-pos_in_eye);
-
-        gl_FragColor = (ambient + diffuse + specular) * object_color;
-         //
-        //   // Calculate the dot product between light direction and normal in eye
-        //   float l_dot_norm = max(dot(light_dir,normal_in_eye), 0.0);
-         //
-        //   float specular = 0.0;
-         //
-        //   // Compute the specular coefficient
-        //   if (l_dot_norm > 0.0) {
-        //      float specular_angle = max( dot(reflect_dir, view_dir), 0.0);
-        //      specular = pow(specular_angle, shininess);
-        //   }
-         //
-        //   // Calculate the final color: ambient/object + diffuse + specular
-        //   gl_FragColor = vec4(vec3(ambient_coef * ambient_color) + l_dot_norm * vec3(diffuse_color) +
-        //                       specular * vec3(specular_color), 1.0) * object_color;
       }
 
     </script>
@@ -111,16 +92,14 @@
         // Pass vertex position to fragment shader
         pos_in_eye = vec3(uVMatrix * uMMatrix * vec4(aVertexPosition, 1.0));
 
-        // vec3 light_vector = normalize(vec3(light_pos_in_eye - pos_in_eye));
-
         // Pass the normal in eye space to the fragment shader
         normal_in_eye = normalize(vec3(uNMatrix * vec4(aVertexNormal,0.0)));
 
+        // Pass the interpreted object color to the fragment shader
+        object_color = aVertexColor;
+
         // Set the vertex position
         gl_Position = uPMatrix * uVMatrix * uMMatrix * vec4(aVertexPosition, 1.0);
-
-        // Pass the object color to the fragment shader
-        object_color = aVertexColor;
 
       }
     </script>
