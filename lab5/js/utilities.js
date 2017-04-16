@@ -19,6 +19,14 @@ const LIGHT_SPEED = 1;
 const SHIFT = 16;
 const ENTER = 13;
 const PAUSE = 80;
+const PANE_LEFT = 65;
+const PANE_RIGHT = 68;
+const PANE_DOWN = 83;
+const PANE_UP = 87;
+const Z_UP = 88;
+const Z_DOWN = 90;
+const PANE_SPEED = 0.15;
+const Z_SPEED = 2.5;
 var lastMouseX = 0, lastMouseY = 0;
 
 
@@ -101,6 +109,32 @@ function updateLightPosition(pos, light_change) {
                 break;
             case LIGHT_BACKWARD:
                 updateLightPosition("Z", -LIGHT_SPEED)
+                drawScene();
+                break;
+            case PANE_RIGHT:
+                console.log("right");
+                CAMERA_X += PANE_SPEED;
+                drawScene();
+                break;
+            case PANE_LEFT:
+                console.log("left");
+                CAMERA_X -= PANE_SPEED;
+                drawScene();
+                break;
+            case PANE_UP:
+                CAMERA_Y += PANE_SPEED;
+                drawScene();
+                break;
+            case PANE_DOWN:
+                CAMERA_Y -= PANE_SPEED;
+                drawScene();
+                break;
+            case Z_UP:
+                Z_ANGLE -= Z_SPEED;
+                drawScene();s
+                break;
+            case Z_DOWN:
+                Z_ANGLE += Z_SPEED;
                 drawScene();
                 break;
             case UP:

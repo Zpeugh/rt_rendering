@@ -12,7 +12,7 @@ var Z_ANGLE = 0.0;
 var FOV_ANGLE = 45.0;
 var CAMERA_X = 0;
 var CAMERA_Y = 0;
-var CAMERA_Z = 5;
+var CAMERA_Z = 0;
 var LIGHT_X = 0;
 var LIGHT_Y = 5;
 var LIGHT_Z = 0;
@@ -22,10 +22,12 @@ var gl;
 var shaderProgram;
 var draw_type = 2;
 var square = {};
-var floor = {};
-var left_wall = {};
-var right_wall = {};
-var back_wall = {};
+var env_neg_y = {};
+var env_pos_y = {};
+var env_neg_x = {};
+var env_pos_x = {};
+var env_pos_z = {};
+var env_neg_z = {};
 var body = {};
 var head = {};
 var left_arm = {};
@@ -65,33 +67,33 @@ function loadImage(location, callback){
 }
 
 function loadImages(locations, callback){
-    var numImages = locations.length;
+    var num_images = locations.length;
     var images = [];
 
     var onLoad = function(){
-        numImages--;
+        num_images--;
 
-        if (numImages == 0){
+        if (num_images == 0){
             callback(images);
         }
     };
 
-    for (var i = 0; i < numImages; ++i) {
+    for (var i = 0; i < num_images; ++i) {
         var img = loadImage(locations[i], onLoad);
         images.push(img);
     }
 }
 
 function handleImagesLoaded(images){
-    var numImages = images.length;
-    for (var i = 0; i < numImages; i++){
+    var num_images = images.length;
+    for (var i = 0; i < num_images; i++){
         var texture = gl.createTexture();
         texture.image = images[i];
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-        // gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindTexture(gl.TEXTURE_2D, null);
         textures.push(texture);
     }
 }
@@ -168,9 +170,10 @@ function setMVmatrix(){
         return mvMatrix;
 }
 
-function drawObject(object, triangle_type) {
+function drawObject(object, triangle_type, draw_type) {
 
     mat4.multiply(mvMatrix, object.matrix, mvMatrix);
+    setMatrixUniforms();
 
     gl.uniform4f(shaderProgram.light_posUniform, light_pos[0], light_pos[1], light_pos[2], light_pos[3]);
     gl.uniform4f(shaderProgram.ambient_coefUniform, object.ambient_coef, object.ambient_coef, object.ambient_coef, 1.0);
@@ -188,26 +191,22 @@ function drawObject(object, triangle_type) {
     gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_normal_buffer);
     gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, object.vertex_normal_buffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    if (object.vertex_color_buffer){
+    if (draw_type == 0){
+        console.log("Draw type: 0");
+        gl.uniform1i(shaderProgram.use_textureUniform, draw_type);
         gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_color_buffer);
         gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, object.vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.uniform1i(shaderProgram.use_textureUniform, 0);
 
-    } else if (object.vertex_texture_coord_buffer) {
+    } else if (draw_type == 1) {
+        console.log("Draw type: 1");
+        gl.uniform1i(shaderProgram.use_textureUniform, draw_type);
         gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_texture_coord_buffer);
         gl.vertexAttribPointer(shaderProgram.vertexTextureCoordAttribute, object.vertex_texture_coord_buffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.uniform1i(shaderProgram.use_textureUniform, 1);
-        shaderProgram.textureUniform = gl.getUniformLocation(shaderProgram, "texture");
-
-    } else {
-        console.log("Using cube map");
-        gl.activeTexture(gl.TEXTURE0);                          // set texture unit 1 to use
+    } else if (draw_type == 2){
+        console.log("Draw type: 2");
+        gl.uniform1i(shaderProgram.use_textureUniform, draw_type);
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, cube_map_texture);  // bind the texture object to the texture unit
-        gl.uniform1i(shaderProgram.cube_mapUniform, 0);         // pass the textu
-        gl.uniform1i(shaderProgram.use_textureUniform, 2);
     }
-
-    setMatrixUniforms();
 
     switch (triangle_type){
         case "TRIANGLE_STRIP":
@@ -226,15 +225,16 @@ function drawObject(object, triangle_type) {
 }
 
 function initializeRoom(){
-    var ambient = 0.4;
-    var diffuse = 0.5;
-    var spec = 0.5;
-    var shine = 64;
-    var color = LIGHTGREY;
-    floor = createPlane(0,0,0,8,0.15,8,color,ambient,diffuse,spec,shine);
-    // right_wall = createPlane(7.85,4,0,0.15,4,8,color,ambient,diffuse,spec,shine);
-    // left_wall = createPlane(-7.85,4,0,0.15,4,8,color,ambient,diffuse,spec,shine);
-    // back_wall = createPlane(0,4,-8,8,4,0.15,color,ambient,diffuse,spec,shine);
+    var x = 0;
+    var y = 0
+    var z = 0;
+    side_length = 5;
+    env_pos_x = createEnvironmentCubeFace(x, y, z, side_length, "RIGHT");
+    env_neg_x = createEnvironmentCubeFace(x, y, z, side_length, "LEFT");
+    env_pos_y = createEnvironmentCubeFace(x, y, z, side_length, "TOP");
+    env_neg_y = createEnvironmentCubeFace(x, y, z, side_length, "BOTTOM");
+    env_pos_z = createEnvironmentCubeFace(x, y, z, side_length, "BACK");
+    env_neg_z = createEnvironmentCubeFace(x, y, z, side_length, "FRONT");
 }
 
 function initializeRobot(x, y, z){
@@ -254,7 +254,7 @@ function webGLStart() {
     var canvas = document.getElementById("lab4-canvas");
     initGL(canvas);
     initShaders();
-    // initTextures();
+    initTextures();
 
     loadImages([
         RESOURCE_LOCATION + "posx.jpg",
@@ -264,6 +264,16 @@ function webGLStart() {
         RESOURCE_LOCATION + "posz.jpg",
         RESOURCE_LOCATION + "negz.jpg",
     ], handleCubeMapImagesLoaded);
+
+
+    loadImages([
+        RESOURCE_LOCATION + "posx.jpg",
+        RESOURCE_LOCATION + "negx.jpg",
+        RESOURCE_LOCATION + "posy.jpg",
+        RESOURCE_LOCATION + "negy.jpg",
+        RESOURCE_LOCATION + "posz.jpg",
+        RESOURCE_LOCATION + "negz.jpg",
+    ], handleImagesLoaded);
 
 
     gl.enable(gl.DEPTH_TEST);
@@ -281,6 +291,7 @@ function webGLStart() {
     gl.enableVertexAttribArray(shaderProgram.vertexTextureCoordAttribute);
 
     shaderProgram.use_textureUniform = gl.getUniformLocation(shaderProgram, "use_texture");
+    shaderProgram.textureUniform = gl.getUniformLocation(shaderProgram, "texture");
     shaderProgram.cube_mapUniform = gl.getUniformLocation(shaderProgram, "cube_map");
     shaderProgram.vMatrixUniform = gl.getUniformLocation(shaderProgram, "uVMatrix");
     shaderProgram.mMatrixUniform = gl.getUniformLocation(shaderProgram, "uMMatrix");
@@ -303,7 +314,6 @@ function webGLStart() {
     initializeRobot(0,0,0);
 
     // $(document).keydown(keypressHandler);
-    // document.onkeydown(keypressHandler);
     document.addEventListener("keydown", keypressHandler, false);
     document.addEventListener('mousedown', onDocumentMouseDown,
           false);
@@ -319,27 +329,69 @@ function drawScene() {
 
     // mvMatrix = setMVmatrix();
     // drawObject(light_bulb, "TRIANGLES");
-    // mvMatrix = setMVmatrix();
-    // drawObject(floor, "TRIANGLES");
-    // mvMatrix = setMVmatrix();
+    mvMatrix = setMVmatrix();
+
+    gl.activeTexture(gl.TEXTURE2);                      // set texture unit 0 to use
+    gl.uniform1i(shaderProgram.textureUniform, 2);      // pass the texture unit to the shader
+    gl.bindTexture(gl.TEXTURE_2D, textures[0]);        // bind the texture object to the texture unit
+
+    drawObject(env_pos_x, "TRIANGLES", 1);
+
+    gl.activeTexture(gl.TEXTURE3);                      // set texture unit 0 to use
+    gl.uniform1i(shaderProgram.textureUniform, 3);      // pass the texture unit to the shader
+    gl.bindTexture(gl.TEXTURE_2D, textures[1]);        // bind the texture object to the texture unit
+
+    drawObject(env_neg_x, "TRIANGLES", 1);
+
+    gl.activeTexture(gl.TEXTURE4);                      // set texture unit 0 to use
+    gl.uniform1i(shaderProgram.textureUniform, 4);      // pass the texture unit to the shader
+    gl.bindTexture(gl.TEXTURE_2D, textures[2]);        // bind the texture object to the texture unit
+
+    drawObject(env_pos_y, "TRIANGLES", 1);
+
+    gl.activeTexture(gl.TEXTURE5);                      // set texture unit 0 to use
+    gl.uniform1i(shaderProgram.textureUniform, 5);      // pass the texture unit to the shader
+    gl.bindTexture(gl.TEXTURE_2D, textures[3]);        // bind the texture object to the texture unit
+
+    drawObject(env_neg_y, "TRIANGLES", 1);
+
+    gl.activeTexture(gl.TEXTURE6);                      // set texture unit 0 to use
+    gl.uniform1i(shaderProgram.textureUniform, 6);      // pass the texture unit to the shader
+    gl.bindTexture(gl.TEXTURE_2D, textures[4]);        // bind the texture object to the texture unit
+
+    drawObject(env_pos_z, "TRIANGLES", 1);
+
+    // gl.activeTexture(gl.TEXTURE7);                      // set texture unit 0 to use
+    // gl.uniform1i(shaderProgram.textureUniform, 7);      // pass the texture unit to the shader
+    // gl.bindTexture(gl.TEXTURE_2D, textures[5]);        // bind the texture object to the texture unit
+    // //
+    // drawObject(env_neg_z, "TRIANGLES", 1);
     // drawObject(right_wall, "TRIANGLES");
     // mvMatrix = setMVmatrix();
     // drawObject(left_wall, "TRIANGLES");
     // mvMatrix = setMVmatrix();
     // drawObject(back_wall, "TRIANGLES");
-    mvMatrix = setMVmatrix();
+    // mvMatrix = setMVmatrix();
+    // mvMatrix = setMVmatrix();
 
-    mat4.identity(v2wMatrix);
-    v2wMatrix = mat4.multiply(v2wMatrix, vMatrix);
-    v2wMatrix = mat4.inverse(v2wMatrix);
-    v2wMatrix = mat4.transpose(v2wMatrix);
+    // mvMatrix = setMVmatrix();
+    //
+    // mat4.identity(v2wMatrix);
+    // v2wMatrix = mat4.multiply(v2wMatrix, vMatrix);
+    // v2wMatrix = mat4.inverse(v2wMatrix);
+    // v2wMatrix = mat4.transpose(v2wMatrix);
+    // //
+    // gl.activeTexture(gl.TEXTURE1);   // set texture unit 0 to use
+    // gl.bindTexture(gl.TEXTURE_2D, cube_map_texture);    // bind the texture object to the texture unit
+    // gl.uniform1i(shaderProgram.cube_mapUniform, 1);         // pass the textu
+    //
+    // drawObject(bottom, "TRIANGLES", 2);
 
-    drawObject(bottom, "TRIANGLES");
-
-    // gl.activeTexture(gl.TEXTURE0);   // set texture unit 0 to use
-    // gl.bindTexture(gl.TEXTURE_2D, rustyTexture);    // bind the texture object to the texture unit
-    // gl.uniform1i(gl.getUniformLocation(shaderProgram, 'texture'), 0);   // pass the texture unit to the shader
-    // drawObject(body, "TRIANGLES");
+    // gl.activeTexture(gl.TEXTURE0);                      // set texture unit 0 to use
+    // gl.bindTexture(gl.TEXTURE_2D, rustyTexture);        // bind the texture object to the texture unit
+    // gl.uniform1i(shaderProgram.textureUniform, 0);      // pass the texture unit to the shader
+    //
+    // drawObject(body, "TRIANGLES", 1);
     // drawObject(head, "TRIANGLES");
     // mvMatrix = setMVmatrix();
     // drawObject(left_arm, "TRIANGLES");

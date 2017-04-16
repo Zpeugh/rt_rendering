@@ -45,35 +45,39 @@
 
       void main(void) {
 
-        //  if (use_texture == 1){
-        //      gl_FragColor = texture2D(texture, texture_coord);
-        //  } else if (use_texture == 0) {
-        //      // Calculate Ambient Lighting
-        //      vec4 ambient =  ambient_coef * ambient_color;
-        //      // Calculate Diffuse Lighting
-        //      vec3 light_dir = normalize(vec3(light_pos_in_eye) - vec3(pos_in_eye));
-        //      float n_dot_l = max(dot(normal_in_eye, light_dir), 0.0);
-        //      vec4 diffuse = n_dot_l * diffuse_color;
-         //
-        //     // Calculate Specular Lighting
-        //     vec3 view_dir = normalize(-pos_in_eye);
-        //     // TODO: see if this should be -view_dir instead of light_dir
-        //     vec3 reflect_dir = reflect(-light_dir, normal_in_eye);
-        //     float r_dot_v = max(dot(reflect_dir,view_dir), 0.0);
-        //     float spec = pow(r_dot_v, shininess);
-        //     vec4 specular = vec4(0.0, 0.0, 0.0, 1.0);
-        //     if (n_dot_l > 0.0)
-        //         specular = specular_coef * spec * specular_color;
-         //
-        //     // Combined fragment color
-        //     gl_FragColor = (ambient + diffuse + specular) * object_color * light_intensity;
+        int type = int(use_texture);
+        // int type = 1;
+         if ( type == 0) {
+            //  Calculate Ambient Lighting
+             vec4 ambient =  ambient_coef * ambient_color;
+             // Calculate Diffuse Lighting
+             vec3 light_dir = normalize(vec3(light_pos_in_eye) - vec3(pos_in_eye));
+             float n_dot_l = max(dot(normal_in_eye, light_dir), 0.0);
+             vec4 diffuse = n_dot_l * diffuse_color;
 
-        // } else if (use_texture == 2) {
+            // Calculate Specular Lighting
+            vec3 view_dir = normalize(-pos_in_eye);
+            // TODO: see if this should be -view_dir instead of light_dir
+            vec3 reflect_dir = reflect(-light_dir, normal_in_eye);
+            float r_dot_v = max(dot(reflect_dir,view_dir), 0.0);
+            float spec = pow(r_dot_v, shininess);
+            vec4 specular = vec4(0.0, 0.0, 0.0, 1.0);
+            if (n_dot_l > 0.0){
+                specular = specular_coef * spec * specular_color;
+            }
+            // Combined fragment color
+            // gl_FragColor = (ambient + diffuse + specular) * object_color * light_intensity;
+
+        } else if (type == 1){
+
+             gl_FragColor = texture2D(texture, texture_coord);
+
+        } else if (type == 2) {
+
             vec3 view_vector = normalize(-pos_in_eye);
             vec3 ref = normalize(reflect(-view_vector, normal_in_eye));  // in eye space
             ref = vec3(uV2WMatrix * vec4(ref,0));   // convert to world space
-            gl_FragColor = textureCube(cube_map, ref);
-        // }
+        }
       }
 
     </script>
@@ -118,9 +122,14 @@
         normal_in_eye = normalize(vec3(uNMatrix * vec4(aVertexNormal,0.0)));
 
         // Pass the interpreted object color to the fragment shader
-        if (use_texture == 0){
+        if ( use_texture == 0 ){
             object_color = aVertexColor;
-        } else if(use_texture == 1) {
+            texture_coord = vec2(0,0);
+        } else if ( use_texture == 1 ) {
+            object_color = vec4(0,0,0,0);
+            texture_coord = aVertexTextureCoord;
+        } else {
+            object_color = vec4(0,0,0,0);
             texture_coord = aVertexTextureCoord;
         }
 

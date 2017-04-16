@@ -65,7 +65,7 @@ function buildLoadedObject(objectData){
 
 
 
-function createPlane(x, y, z, length, width, thickness, color, ambient_coef, diffuse_coef, specular_coef, shininess){
+function createPlane(x, y, z, length, width, side_length, color, ambient_coef, diffuse_coef, specular_coef, shininess){
     mat = mat4.create();
     mat4.identity(mat);
 
@@ -266,6 +266,284 @@ function createPlane(x, y, z, length, width, thickness, color, ambient_coef, dif
 
     return plane;
 }
+
+
+function createEnvironmentCubeFace(x, y, z, side_length, face_enum){
+    mat = mat4.create();
+    mat4.identity(mat);
+
+    var face = {
+        matrix: mat,
+        vertex_position_buffer: {},
+        vertex_index_buffer: {},
+        vertex_normal_buffer: {},
+        vertex_texture_coord_buffer: {}
+    };
+
+    var vertices = [];
+    var indices = [];
+    var normals = [];
+    var texture_coords = [];
+
+    // Draw the vertices
+    if (face_enum == "FRONT"){
+
+        // Front Face
+        vertices.push(x - side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x - side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z + side_length); //z
+    }
+
+    if (face_enum == "BACK"){
+
+        // Back Face
+        vertices.push(x - side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x - side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z - side_length); //z
+    }
+
+    if (face_enum == "TOP"){
+
+        // Top Face
+        vertices.push(x - side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x - side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z - side_length); //z
+    }
+
+    if (face_enum == "BOTTOM"){
+        // Bottom Face
+        vertices.push(x - side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x - side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z + side_length); //z
+    }
+
+    if (face_enum == "RIGHT"){
+
+        // Right Face
+        vertices.push(x + side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x + side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z + side_length); //z
+    }
+
+    if (face_enum == "LEFT"){
+
+        // Left Face
+        vertices.push(x - side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z - side_length); //z
+
+        vertices.push(x - side_length); //x
+        vertices.push(y - side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x - side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z + side_length); //z
+
+        vertices.push(x - side_length); //x
+        vertices.push(y + side_length); //y
+        vertices.push(z - side_length); //z
+    }
+
+    if (face_enum == "FRONT"){
+        // Front face
+        normals = [
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0
+        ];
+
+        texture_coords = [
+            1.0,  1.0,
+            0.0,  1.0,
+            0.0,  0.0,
+            1.0,  0.0
+        ];
+    }
+
+    if (face_enum == "BACK"){
+        // Back face
+        normals = [
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+            0.0, 0.0, 1.0,
+        ];
+
+        texture_coords = [
+
+            0.0,  1.0,
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0
+
+        ];
+    }
+
+    if (face_enum == "TOP"){
+        // Top face
+        normals = [
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0,
+            0.0, -1.0, 0.0
+        ];
+
+        texture_coords = [
+
+            0.0,  1.0,
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0
+        ];
+    }
+
+    if (face_enum == "BOTTOM"){
+        // Bottom face
+        normals = [
+            0.0, 1.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 1.0, 0.0,
+            0.0, 1.0, 0.0,
+        ];
+
+        texture_coords = [
+
+            0.0,  0.0,
+            1.0,  0.0,
+            1.0,  1.0,
+            0.0,  1.0
+        ];
+    }
+
+    if (face_enum == "RIGHT"){
+        // Right face
+        normals = [
+            -1.0, 0.0, 0.0,
+            -1.0, 0.0, 0.0,
+            -1.0, 0.0, 0.0,
+            -1.0, 0.0, 0.0,
+        ];
+
+        texture_coords = [
+
+            1.0,  1.0,
+            1.0,  0.0,
+            0.0,  0.0,
+            0.0,  1.0
+        ];
+    }
+
+    if (face_enum == "LEFT"){
+        // Left face
+        normals = [
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0,
+            1.0, 0.0, 0.0,
+        ];
+
+        texture_coords = [
+
+            0.0,  1.0,
+            1.0,  1.0,
+            1.0,  0.0,
+            0.0,  0.0
+        ];
+    }
+
+    // Add the vertex indices
+    indices = [ 0, 1, 2, 0, 2, 3];
+
+    // Create Buffer Objects
+    face.vertex_position_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, face.vertex_position_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    face.vertex_position_buffer.itemSize = 3;
+    face.vertex_position_buffer.numItems = 4;
+
+    face.vertex_index_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, face.vertex_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+    face.vertex_index_buffer.itemSize = 1;
+    face.vertex_index_buffer.numItems = 6;
+
+    face.vertex_normal_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, face.vertex_normal_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+    face.vertex_normal_buffer.itemSize = 3;
+    face.vertex_normal_buffer.numItems = 4;
+
+    face.vertex_texture_coord_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, face.vertex_texture_coord_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texture_coords), gl.STATIC_DRAW);
+    face.vertex_texture_coord_buffer.itemSize = 2;
+    face.vertex_texture_coord_buffer.numItems = 4;
+
+    return face;
+}
+
 
 function createCube(x, y, z, rad, color, ambient_coef, diffuse_coef, specular_coef, shininess) {
     mat = mat4.create();
