@@ -1,0 +1,148 @@
+<!--
+  * Date: 4/9/2017
+  * Author: Zach Peugh
+  * Class: CSE 5542
+  * Assignment: Lab 4
+  * Desciption: Main html file for lab 4
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="js/glMatrix-0.9.5.min.js"></script>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <link rel="stylesheet" type="text/css" href="css/display.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+
+    <title>Lab 4</title>
+    <!--  ************** Fragment Shader ************* -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+      precision mediump float;
+      precision mediump int;
+
+      uniform vec4 ambient_coef;
+      uniform vec4 diffuse_coef;
+      uniform vec4 specular_coef;
+      uniform float shininess;
+      uniform float light_intensity;
+
+      uniform vec4 ambient_color;
+      uniform vec4 diffuse_color;
+      uniform vec4 specular_color;
+      uniform int use_texture;
+      uniform sampler2D texture;
+      uniform samplerCube cube_map;
+      uniform mat4 uV2WMatrix;
+
+      varying vec3 light_pos_in_eye;
+      varying vec3 normal_in_eye;
+      varying vec3 pos_in_eye;
+      varying vec4 object_color;
+      varying highp vec2 texture_coord;
+
+      void main(void) {
+
+        //  if (use_texture == 1){
+        //      gl_FragColor = texture2D(texture, texture_coord);
+        //  } else if (use_texture == 0) {
+        //      // Calculate Ambient Lighting
+        //      vec4 ambient =  ambient_coef * ambient_color;
+        //      // Calculate Diffuse Lighting
+        //      vec3 light_dir = normalize(vec3(light_pos_in_eye) - vec3(pos_in_eye));
+        //      float n_dot_l = max(dot(normal_in_eye, light_dir), 0.0);
+        //      vec4 diffuse = n_dot_l * diffuse_color;
+         //
+        //     // Calculate Specular Lighting
+        //     vec3 view_dir = normalize(-pos_in_eye);
+        //     // TODO: see if this should be -view_dir instead of light_dir
+        //     vec3 reflect_dir = reflect(-light_dir, normal_in_eye);
+        //     float r_dot_v = max(dot(reflect_dir,view_dir), 0.0);
+        //     float spec = pow(r_dot_v, shininess);
+        //     vec4 specular = vec4(0.0, 0.0, 0.0, 1.0);
+        //     if (n_dot_l > 0.0)
+        //         specular = specular_coef * spec * specular_color;
+         //
+        //     // Combined fragment color
+        //     gl_FragColor = (ambient + diffuse + specular) * object_color * light_intensity;
+
+        // } else if (use_texture == 2) {
+            vec3 view_vector = normalize(-pos_in_eye);
+            vec3 ref = normalize(reflect(-view_vector, normal_in_eye));  // in eye space
+            ref = vec3(uV2WMatrix * vec4(ref,0));   // convert to world space
+            gl_FragColor = textureCube(cube_map, ref);
+        // }
+      }
+
+    </script>
+
+    <!--  ************** Vertex Shader ************* -->
+    <script id="shader-vs" type="x-shader/x-vertex">
+
+
+      precision mediump float;
+      precision mediump int;
+
+      attribute vec3 aVertexPosition;
+      attribute vec3 aVertexNormal;
+      attribute vec4 aVertexColor;
+      attribute vec2 aVertexTextureCoord;
+
+      uniform mat4 uVMatrix;
+      uniform mat4 uMMatrix;
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+      uniform mat4 uNMatrix;
+      uniform mat4 uV2WMatrix;
+
+      uniform vec4 light_pos;
+      uniform int use_texture;
+
+      varying vec3 normal_in_eye;
+      varying vec3 pos_in_eye;
+      varying vec3 light_pos_in_eye;
+      varying vec4 object_color;
+      varying highp vec2 texture_coord;
+
+      void main(void) {
+
+        // transform light pos from world space to eye space
+        light_pos_in_eye = vec3(uVMatrix * light_pos);
+
+        // Pass vertex position to fragment shader
+        pos_in_eye = vec3(uVMatrix * uMMatrix * vec4(aVertexPosition, 1.0));
+
+        // Pass the normal in eye space to the fragment shader
+        normal_in_eye = normalize(vec3(uNMatrix * vec4(aVertexNormal,0.0)));
+
+        // Pass the interpreted object color to the fragment shader
+        if (use_texture == 0){
+            object_color = aVertexColor;
+        } else if(use_texture == 1) {
+            texture_coord = aVertexTextureCoord;
+        }
+
+        // Set the vertex position
+        gl_Position = uPMatrix * uVMatrix * uMMatrix * vec4(aVertexPosition, 1.0);
+
+      }
+    </script>
+
+    <script type="text/javascript" src="js/shader_setup.js"></script>
+    <script type="text/javascript" src="js/utilities.js"></script>
+    <script type="text/javascript" src="js/create_objects.js"></script>
+    <script type="text/javascript" src="js/display.js"></script>
+
+</head>
+
+<body onload="webGLStart();">
+        <div class="row">
+            <canvas id="lab4-canvas" height="500" , width="500"></canvas>
+        </div>
+    </div>
+
+</body>
+
+</html>
