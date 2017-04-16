@@ -31,18 +31,18 @@ var lastMouseX = 0, lastMouseY = 0;
 
 
 function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.vMatrixUniform, false, vMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mMatrixUniform, false, mMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-    gl.uniformMatrix4fv(shaderProgram.v2wMatrixUniform, false, v2wMatrix);
+    gl.uniformMatrix4fv(shader_program.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shader_program.vMatrixUniform, false, vMatrix);
+    gl.uniformMatrix4fv(shader_program.mMatrixUniform, false, mMatrix);
+    gl.uniformMatrix4fv(shader_program.mvMatrixUniform, false, mvMatrix);
+    gl.uniformMatrix4fv(shader_program.v2wMatrixUniform, false, v2wMatrix);
 
     mat4.identity(nMatrix);
     nMatrix = mat4.multiply(nMatrix, vMatrix);
     nMatrix = mat4.multiply(nMatrix, mMatrix);
     nMatrix = mat4.inverse(nMatrix);
     nMatrix = mat4.transpose(nMatrix);
-    gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);
+    gl.uniformMatrix4fv(shader_program.nMatrixUniform, false, nMatrix);
 
 }
 
