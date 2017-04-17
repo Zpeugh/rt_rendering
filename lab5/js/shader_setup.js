@@ -63,7 +63,6 @@
             console.error(gl.getProgramInfoLog(texture_map_shader_program));
         }
 
-
     }
 
 function initializeShaderVariables(){

@@ -25,7 +25,7 @@ const PANE_DOWN = 83;
 const PANE_UP = 87;
 const Z_UP = 88;
 const Z_DOWN = 90;
-const PANE_SPEED = 0.15;
+const PANE_SPEED = 0.5;
 const Z_SPEED = 2.5;
 var lastMouseX = 0, lastMouseY = 0;
 
@@ -66,7 +66,7 @@ function changeLightIntensity(up_or_down){
     }
 }
 
-function updateLightPosition(pos, light_change) {
+function updateLightPosition(pos, light_xchange) {
     switch (pos) {
         case "X":
             light_pos[0] += light_change;
@@ -87,30 +87,6 @@ function updateLightPosition(pos, light_change) {
 }
     function keypressHandler(key) {
         switch (key.which) {
-            case LIGHT_RIGHT:
-                updateLightPosition("X", LIGHT_SPEED)
-                drawScene();
-                break;
-            case LIGHT_LEFT:
-                updateLightPosition("X", -LIGHT_SPEED)
-                drawScene();
-                break;
-            case LIGHT_UP:
-                updateLightPosition("Y", LIGHT_SPEED)
-                drawScene();
-                break;
-            case LIGHT_DOWN:
-                updateLightPosition("Y", -LIGHT_SPEED)
-                drawScene();
-                break;
-            case LIGHT_FORWARD:
-                updateLightPosition("Z", LIGHT_SPEED)
-                drawScene();
-                break;
-            case LIGHT_BACKWARD:
-                updateLightPosition("Z", -LIGHT_SPEED)
-                drawScene();
-                break;
             case PANE_RIGHT:
                 console.log("right");
                 CAMERA_X += PANE_SPEED;
@@ -130,18 +106,21 @@ function updateLightPosition(pos, light_change) {
                 drawScene();
                 break;
             case Z_UP:
-                Z_ANGLE -= Z_SPEED;
-                drawScene();s
+                CAMERA_Z += PANE_SPEED;
+                drawScene();
                 break;
             case Z_DOWN:
-                Z_ANGLE += Z_SPEED;
+                CAMERA_Z -= PANE_SPEED;
                 drawScene();
                 break;
             case UP:
+                movement_matrix = mat4.rotate(movement_matrix, degToRad(90), [0, 1, 0]);
                 changeLightIntensity("UP");
                 drawScene();
                 break;
             case DOWN:
+                CAMERA_Z -= PANE_SPEED;
+
                 changeLightIntensity("DOWN");
                 drawScene();
                 break;

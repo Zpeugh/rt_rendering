@@ -9,10 +9,10 @@
 
 // Initialize all global variables
 var Z_ANGLE = 0.0;
-var FOV_ANGLE = 45.0;
+var FOV_ANGLE = 80.0;
 var CAMERA_X = 0;
-var CAMERA_Y = 5;
-var CAMERA_Z = 10;
+var CAMERA_Y = -21;
+var CAMERA_Z = 0;
 var LIGHT_X = 0;
 var LIGHT_Y = 5;
 var LIGHT_Z = 0;
@@ -50,7 +50,9 @@ var light_intensity = 1;
 var rustyTexture;
 var corrugatedTexture;
 var textures = [];
+var center_of_interest = [-10,-30,-12];
 var cube_map_texture = {};
+var movement_matrix = mat4.create();
 
 const RESOURCE_LOCATION = "./resources/";
 
@@ -94,6 +96,8 @@ function handleImagesLoaded(images){
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
         textures.push(texture);
     }
@@ -162,8 +166,8 @@ function initGL(canvas) {
 }
 
 function setMVmatrix(){
-        mat4.perspective(FOV_ANGLE, 1.0, 0.1, 100, pMatrix); // set up the projection matrix
-        vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, CAMERA_Z], [0, 0, 0], [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
+        mat4.perspective(FOV_ANGLE, 1.0, 0.1, 500, pMatrix); // set up the projection matrix
+        vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, CAMERA_Z], center_of_interest, [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
 
         mat4.identity(mMatrix);
         mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 0, 1]); // now set up the model matrix
@@ -230,7 +234,7 @@ function initializeRoom(){
     var x = 0;
     var y = 0
     var z = 0;
-    side_length = 50;
+    side_length = 30;
     env_pos_x = createEnvironmentCubeFace(x, y, z, side_length, "RIGHT");
     env_neg_x = createEnvironmentCubeFace(x, y, z, side_length, "LEFT");
     env_pos_y = createEnvironmentCubeFace(x, y, z, side_length, "TOP");
@@ -267,32 +271,34 @@ function webGLStart() {
     // initTextures();
 
     loadImages([
-        RESOURCE_LOCATION + "posx.jpg",
-        RESOURCE_LOCATION + "negx.jpg",
-        RESOURCE_LOCATION + "posy.jpg",
-        RESOURCE_LOCATION + "negy.jpg",
-        RESOURCE_LOCATION + "posz.jpg",
-        RESOURCE_LOCATION + "negz.jpg",
+        RESOURCE_LOCATION + "cubemap1/posx.png",
+        RESOURCE_LOCATION + "cubemap1/negx.png",
+        RESOURCE_LOCATION + "cubemap1/posy.png",
+        RESOURCE_LOCATION + "cubemap1/negy.png",
+        RESOURCE_LOCATION + "cubemap1/posz.png",
+        RESOURCE_LOCATION + "cubemap1/negz.png",
     ], handleCubeMapImagesLoaded);
 
 
     loadImages([
-        RESOURCE_LOCATION + "posx.jpg",
-        RESOURCE_LOCATION + "negx.jpg",
-        RESOURCE_LOCATION + "posy.jpg",
-        RESOURCE_LOCATION + "negy.jpg",
-        RESOURCE_LOCATION + "posz.jpg",
-        RESOURCE_LOCATION + "negz.jpg",
+        RESOURCE_LOCATION + "cubemap1/posx.png",
+        RESOURCE_LOCATION + "cubemap1/negx.png",
+        RESOURCE_LOCATION + "cubemap1/posy.png",
+        RESOURCE_LOCATION + "cubemap1/negy.png",
+        RESOURCE_LOCATION + "cubemap1/posz.png",
+        RESOURCE_LOCATION + "cubemap1/negz.png",
         RESOURCE_LOCATION + "rusty_metal.png",
-        RESOURCE_LOCATION + "corrugated_metal.png"
+        RESOURCE_LOCATION + "metal_spiral.png"
     ], handleImagesLoaded);
 
+    mat4.identity(movement_matrix);
 
     gl.enable(gl.DEPTH_TEST);
 
     light_bulb = createSphere(LIGHT_X, LIGHT_Y, LIGHT_Z, 0.15, WHITE, 50, 100, 1, 1, 1, 1);
     initializeRoom();
-    initializeRobot(0,0,0);
+    initializeRobot(center_of_interest[0], center_of_interest[1], center_of_interest[2]);
+
 
     document.addEventListener('keydown', keypressHandler, false);
     document.addEventListener('mousedown', onDocumentMouseDown, false);
@@ -350,24 +356,25 @@ function drawScene() {
     gl.activeTexture(gl.TEXTURE6);                      // set texture unit 0 to use
     gl.bindTexture(gl.TEXTURE_2D, textures[6]);        // bind the texture object to the texture unit
     gl.uniform1i(shader_program.textureUniform, 6);      // pass the texture unit to the shader
-
     drawObject(body, "TRIANGLES", 1);
-
-    gl.activeTexture(gl.TEXTURE7);                      // set texture unit 0 to use
-    gl.bindTexture(gl.TEXTURE_2D, textures[7]);        // bind the texture object to the texture unit
-    gl.uniform1i(shader_program.textureUniform, 7);      // pass the texture unit to the shader
-
-    drawObject(head, "TRIANGLES");
+    drawObject(head, "TRIANGLES", 1);
+    // drawObject(body, "TRIANGLES", 1);
+    //
+    // gl.activeTexture(gl.TEXTURE7);                      // set texture unit 0 to use
+    // gl.bindTexture(gl.TEXTURE_2D, textures[7]);        // bind the texture object to the texture unit
+    // gl.uniform1i(shader_program.textureUniform, 7);      // pass the texture unit to the shader
+    //
+    // drawObject(head, "TRIANGLES", 1);
     // mvMatrix = setMVmatrix();
-    // drawObject(left_arm, "TRIANGLES");
-    // drawObject(right_arm, "TRIANGLES");
+
 
 
     switchShader(cube_map_shader_program);
-    mvMatrix = setMVmatrix();
+    mvMatrix = mat4.multiply(mvMatrix, movement_matrix);
 
     mat4.identity(v2wMatrix);
     v2wMatrix = mat4.multiply(v2wMatrix, vMatrix);
+    v2wMatrix = mat4.multiply(v2wMatrix, movement_matrix);
     v2wMatrix = mat4.inverse(v2wMatrix);
     v2wMatrix = mat4.transpose(v2wMatrix);
     //
@@ -375,6 +382,11 @@ function drawScene() {
     gl.bindTexture(gl.TEXTURE_2D, cube_map_texture);    // bind the texture object to the texture unit
     gl.uniform1i(shader_program.cube_mapUniform, 1);         // pass the textu
 
+    // mvMatrix = mat4.rotate(mvMatrix, degToRad(90), [0, 1, 0]);
     drawObject(bottom, "TRIANGLES", 2);
+    // drawObject(body, "TRIANGLES", 2);
+    // drawObject(head, "TRIANGLES", 2);
+    drawObject(left_arm, "TRIANGLES", 2);
+    drawObject(right_arm, "TRIANGLES", 2);
 
 }

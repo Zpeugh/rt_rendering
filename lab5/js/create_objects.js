@@ -452,10 +452,11 @@ function createEnvironmentCubeFace(x, y, z, side_length, face_enum){
 
         texture_coords = [
 
-            0.0,  1.0,
             0.0,  0.0,
             1.0,  0.0,
-            1.0,  1.0
+            1.0,  1.0,
+            0.0,  1.0
+
         ];
     }
 
@@ -470,10 +471,10 @@ function createEnvironmentCubeFace(x, y, z, side_length, face_enum){
 
         texture_coords = [
 
+            0.0,  1.0,
             0.0,  0.0,
             1.0,  0.0,
-            1.0,  1.0,
-            0.0,  1.0
+            1.0,  1.0
         ];
     }
 
@@ -488,10 +489,10 @@ function createEnvironmentCubeFace(x, y, z, side_length, face_enum){
 
         texture_coords = [
 
-            1.0,  1.0,
-            1.0,  0.0,
+            0.0,  1.0,
             0.0,  0.0,
-            0.0,  1.0
+            1.0,  0.0,
+            1.0,  1.0
         ];
     }
 
@@ -506,10 +507,11 @@ function createEnvironmentCubeFace(x, y, z, side_length, face_enum){
 
         texture_coords = [
 
-            0.0,  1.0,
             1.0,  1.0,
-            1.0,  0.0,
-            0.0,  0.0
+            0.0,  1.0,
+            0.0,  0.0,
+            1.0,  0.0
+
         ];
     }
 
