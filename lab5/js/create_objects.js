@@ -21,7 +21,6 @@ function buildLoadedObject(objectData){
         vertex_index_buffer: {},
         vertex_normal_buffer: {},
         vertex_color_buffer: {},
-        vertex_texture_buffer: {},
         ambient_coef: 0.2,
         diffuse_coef: 0.6,
         specular_coef: 0.1,
@@ -31,15 +30,33 @@ function buildLoadedObject(objectData){
     console.log(" in hand LoadedTeapot");
     obj.vertex_position_buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertex_position_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(objectData.vertexPositions),gl.STATIC_DRAW);
-    obj.vertex_position_buffer.itemSize=3;
-    obj.vertex_position_buffer.numItems=objectData.vertexPositions.length/3;
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(objectData.vertices),gl.STATIC_DRAW);
+    obj.vertex_position_buffer.itemSize = 3;
+    obj.vertex_position_buffer.numItems = objectData.metadata.vertices;
 
     obj.vertex_normal_buffer =  gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER,  obj.vertex_normal_buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objectData.vertexNormals), gl.STATIC_DRAW);
-    obj.vertex_normal_buffer.itemSize=3;
-    obj.vertex_normal_buffer.numItems= objectData.vertexNormals.length/3;
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objectData.normals), gl.STATIC_DRAW);
+    obj.vertex_normal_buffer.itemSize = 3;
+    obj.vertex_normal_buffer.numItems = objectData.metadata.normals;
+
+    var colors = [];
+    for (var i = 0; i < objectData.metadata.vertices; i++){
+        colors = colors.concat([0.4, 0.4, 0.5, 1]);
+    }
+
+    obj.vertex_color_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertex_color_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    obj.vertex_color_buffer.itemSize = 4;
+    obj.vertex_color_buffer.numItems = objectData.metadata.vertices;
+
+    obj.vertex_index_buffer= gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.vertex_index_buffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(objectData.indices), gl.STATIC_DRAW);
+    obj.vertex_index_buffer.itemSize= 1;
+    obj.vertex_index_buffer.numItems= objectData.metadata.indices;
+
 
     // obj.vertex_texture_coord_buffer=gl.createBuffer();
     // gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertex_texture_coord_buffer);
@@ -47,18 +64,11 @@ function buildLoadedObject(objectData){
 	// 	  gl.STATIC_DRAW);
     // obj.vertex_texture_coord_buffer.itemSize=2;
     // obj.vertex_texture_coord_buffer.numItems=objectData.vertexTextureCoords.length/2;
-
-    obj.vertex_index_buffer= gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.vertex_index_buffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(objectData.indices), gl.STATIC_DRAW);
-    obj.vertex_index_buffer.itemSize=1;
-    obj.vertex_index_buffer.numItems=objectData.indices.length;
-
-    obj.vertex_index_buffer= gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.vertex_index_buffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(objectData.indices), gl.STATIC_DRAW);
-    obj.vertex_index_buffer.itemSize=1;
-    obj.vertex_index_buffer.numItems=objectData.indices.length;
+    // obj.vertex_index_buffer= gl.createBuffer();
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.vertex_index_buffer);
+    // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(objectData.indices), gl.STATIC_DRAW);
+    // obj.vertex_index_buffer.itemSize=1;
+    // obj.vertex_index_buffer.numItems=objectData.indices.length;
 
     return obj
 }

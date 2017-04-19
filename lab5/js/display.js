@@ -10,10 +10,10 @@
 // Initialize all global variables
 var Z_ANGLE = 0.0;
 var FOV_ANGLE = 80.0;
-var CAMERA_X = 0;
-var CAMERA_Y = -21;
-var CAMERA_Z = 0;
-var LIGHT_X = 0;
+var CAMERA_X = -6.5;
+var CAMERA_Y = -1;
+var CAMERA_Z = 10;
+var LIGHT_X = 3;
 var LIGHT_Y = 5;
 var LIGHT_Z = 0;
 const LIGHTGREY = [0.9, 0.9, 0.9, 1];
@@ -36,6 +36,7 @@ var left_arm = {};
 var right_arm = {};
 var bottom = {};
 var light_bulb = {};
+var jetpack = {};
 var vMatrix = mat4.create();    // view matrix
 var mMatrix = mat4.create();    // model matrixs
 var mvMatrix = mat4.create();   // modelview matrix
@@ -50,7 +51,7 @@ var light_intensity = 1;
 var rustyTexture;
 var corrugatedTexture;
 var textures = [];
-var center_of_interest = [-10,-30,-12];
+var COI = [0, 0, 0];
 var cube_map_texture = {};
 var movement_matrix = mat4.create();
 
@@ -61,6 +62,23 @@ function initTextures() {
     rustyTexture.image = new Image();
     rustyTexture.image.src = RESOURCE_LOCATION + "rusty_metal.png";
     rustyTexture.image.onload = function() { handleTextureLoaded(rustyTexture); }
+}
+
+function loadObject(object, file_location) {
+    // var request = new  XMLHttpRequest();
+    // request.open("GET", file_location);
+    $.getJSON(file_location, function(json){
+        console.log(json);
+        jetpack =  buildLoadedObject(json);
+    })
+    // request.onreadystatechange =
+    //   function () {
+        //   if (request.readyState == 4) {
+	    //   console.log("state = "+request.readyState);
+            //   object = buildLoadedObject(JSON.parse(request.responseText));
+        // }
+    //   }
+    // request.send();
 }
 
 function loadImage(location, callback){
@@ -140,19 +158,6 @@ function handleCubeMapImagesLoaded(images){
     console.log("Loaded Cube Map", cube_map_texture);
 }
 
-function initJSON() {
-    var request = new  XMLHttpRequest();
-    request.open("GET", "resources/teapot.json");
-    request.onreadystatechange =
-      function () {
-          if (request.readyState == 4) {
-	      console.log("state ="+request.readyState);
-              handleLoadedTeapot(JSON.parse(request.responseText));
-        }
-      }
-    request.send();
-}
-
 
 function initGL(canvas) {
     try {
@@ -167,7 +172,7 @@ function initGL(canvas) {
 
 function setMVmatrix(){
         mat4.perspective(FOV_ANGLE, 1.0, 0.1, 500, pMatrix); // set up the projection matrix
-        vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, CAMERA_Z], center_of_interest, [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
+        vMatrix = mat4.lookAt([CAMERA_X, CAMERA_Y, CAMERA_Z], COI, [0, 1, 0], mvMatrix); // set up the view matrix, multiply into the modelview matrix
 
         mat4.identity(mMatrix);
         mMatrix = mat4.rotate(mMatrix, degToRad(Z_ANGLE), [0, 0, 1]); // now set up the model matrix
@@ -269,6 +274,7 @@ function webGLStart() {
     shader_program = texture_map_shader_program;
     initializeShaderVariables();
     // initTextures();
+    loadObject(jetpack, RESOURCE_LOCATION + "jetpack.json");
 
     loadImages([
         RESOURCE_LOCATION + "cubemap1/posx.png",
@@ -297,7 +303,7 @@ function webGLStart() {
 
     light_bulb = createSphere(LIGHT_X, LIGHT_Y, LIGHT_Z, 0.15, WHITE, 50, 100, 1, 1, 1, 1);
     initializeRoom();
-    initializeRobot(center_of_interest[0], center_of_interest[1], center_of_interest[2]);
+    initializeRobot(COI[0], COI[1], COI[2]);
 
 
     document.addEventListener('keydown', keypressHandler, false);
@@ -317,45 +323,45 @@ function drawScene() {
 
     mvMatrix = setMVmatrix();
 
-    gl.activeTexture(gl.TEXTURE0);                      // set texture unit 0 to use
-    gl.uniform1i(shader_program.textureUniform, 0);      // pass the texture unit to the shader
+    gl.activeTexture(gl.TEXTURE0);                     // set texture unit 0 to use
+    gl.uniform1i(shader_program.textureUniform, 0);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[0]);        // bind the texture object to the texture unit
 
     drawObject(env_pos_x, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE1);                      // set texture unit 0 to use
-    gl.uniform1i(shader_program.textureUniform, 1);      // pass the texture unit to the shader
+    gl.activeTexture(gl.TEXTURE1);                     // set texture unit 0 to use
+    gl.uniform1i(shader_program.textureUniform, 1);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[1]);        // bind the texture object to the texture unit
 
     drawObject(env_neg_x, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE2);                      // set texture unit 0 to use
-    gl.uniform1i(shader_program.textureUniform, 2);      // pass the texture unit to the shader
+    gl.activeTexture(gl.TEXTURE2);                     // set texture unit 0 to use
+    gl.uniform1i(shader_program.textureUniform, 2);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[2]);        // bind the texture object to the texture unit
 
     drawObject(env_pos_y, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE3);                      // set texture unit 0 to use
-    gl.uniform1i(shader_program.textureUniform, 3);      // pass the texture unit to the shader
+    gl.activeTexture(gl.TEXTURE3);                     // set texture unit 0 to use
+    gl.uniform1i(shader_program.textureUniform, 3);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[3]);        // bind the texture object to the texture unit
 
     drawObject(env_neg_y, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE4);                      // set texture unit 0 to use
-    gl.uniform1i(shader_program.textureUniform, 4);      // pass the texture unit to the shader
+    gl.activeTexture(gl.TEXTURE4);                     // set texture unit 0 to use
+    gl.uniform1i(shader_program.textureUniform, 4);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[4]);        // bind the texture object to the texture unit
 
     drawObject(env_pos_z, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE5);                      // set texture unit 0 to use
-    gl.uniform1i(shader_program.textureUniform, 5);      // pass the texture unit to the shader
+    gl.activeTexture(gl.TEXTURE5);                     // set texture unit 0 to use
+    gl.uniform1i(shader_program.textureUniform, 5);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[5]);        // bind the texture object to the texture unit
 
     drawObject(env_neg_z, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE6);                      // set texture unit 0 to use
+    gl.activeTexture(gl.TEXTURE6);                     // set texture unit 0 to use
     gl.bindTexture(gl.TEXTURE_2D, textures[6]);        // bind the texture object to the texture unit
-    gl.uniform1i(shader_program.textureUniform, 6);      // pass the texture unit to the shader
+    gl.uniform1i(shader_program.textureUniform, 6);    // pass the texture unit to the shader
     drawObject(body, "TRIANGLES", 1);
     drawObject(head, "TRIANGLES", 1);
     // drawObject(body, "TRIANGLES", 1);
@@ -388,5 +394,6 @@ function drawScene() {
     // drawObject(head, "TRIANGLES", 2);
     drawObject(left_arm, "TRIANGLES", 2);
     drawObject(right_arm, "TRIANGLES", 2);
+    drawObject(jetpack, "TRIANGLES", 0);
 
 }

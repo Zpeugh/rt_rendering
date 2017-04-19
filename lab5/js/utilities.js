@@ -114,14 +114,19 @@ function updateLightPosition(pos, light_xchange) {
                 drawScene();
                 break;
             case UP:
-                movement_matrix = mat4.rotate(movement_matrix, degToRad(90), [0, 1, 0]);
-                changeLightIntensity("UP");
+                COI[1] += PANE_SPEED;
                 drawScene();
                 break;
             case DOWN:
-                CAMERA_Z -= PANE_SPEED;
-
-                changeLightIntensity("DOWN");
+                COI[1] -= PANE_SPEED;
+                drawScene();
+                break;
+            case RIGHT:
+                COI[0] += PANE_SPEED;
+                drawScene();
+                break;
+            case LEFT:
+                COI[0] -= PANE_SPEED;
                 drawScene();
                 break;
             default:
