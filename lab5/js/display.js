@@ -10,12 +10,13 @@
 // Initialize all global variables
 var Z_ANGLE = 0.0;
 var FOV_ANGLE = 80.0;
-var CAMERA_X = -6.5;
-var CAMERA_Y = -1;
-var CAMERA_Z = 10;
+var CAMERA_X = -4;
+var CAMERA_Y = 6;
+var CAMERA_Z = 3.5;
 var LIGHT_X = 3;
 var LIGHT_Y = 5;
 var LIGHT_Z = 0;
+var COI = [-2, 0.35, 1.2];
 const LIGHTGREY = [0.9, 0.9, 0.9, 1];
 const WHITE = [1, 1, 1, 1];
 var gl;
@@ -51,7 +52,6 @@ var light_intensity = 1;
 var rustyTexture;
 var corrugatedTexture;
 var textures = [];
-var COI = [0, 0, 0];
 var cube_map_texture = {};
 var movement_matrix = mat4.create();
 
@@ -65,20 +65,17 @@ function initTextures() {
 }
 
 function loadObject(object, file_location) {
-    // var request = new  XMLHttpRequest();
-    // request.open("GET", file_location);
-    $.getJSON(file_location, function(json){
-        console.log(json);
-        jetpack =  buildLoadedObject(json);
-    })
-    // request.onreadystatechange =
-    //   function () {
-        //   if (request.readyState == 4) {
-	    //   console.log("state = "+request.readyState);
-            //   object = buildLoadedObject(JSON.parse(request.responseText));
-        // }
-    //   }
-    // request.send();
+    var request = new  XMLHttpRequest();
+    request.open("GET", file_location);
+    request.onreadystatechange =
+      function () {
+          if (request.readyState == 4) {
+          jetpack =  new OBJ.Mesh(request.responseText);
+          buildLoadedObject(jetpack, [0.4, 0.4, 0.5, 1])
+          console.log(jetpack);
+        }
+      }
+    request.send();
 }
 
 function loadImage(location, callback){
@@ -203,18 +200,17 @@ function drawObject(object, triangle_type, draw_type) {
     gl.vertexAttribPointer(shader_program.vertexNormalAttribute, object.vertex_normal_buffer.itemSize, gl.FLOAT, false, 0, 0);
 
     if (draw_type == 0){
-        console.log("Draw type: 0");
+        gl.disableVertexAttribArray(shader_program.vertexTextureCoordAttribute);
         gl.uniform1i(shader_program.use_textureUniform, draw_type);
         gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_color_buffer);
         gl.vertexAttribPointer(shader_program.vertexColorAttribute, object.vertex_color_buffer.itemSize, gl.FLOAT, false, 0, 0);
 
     } else if (draw_type == 1) {
-        console.log("Draw type: 1");
+        gl.disableVertexAttribArray(shader_program.vertexColorAttribute);
         gl.uniform1i(shader_program.use_textureUniform, draw_type);
         gl.bindBuffer(gl.ARRAY_BUFFER, object.vertex_texture_coord_buffer);
         gl.vertexAttribPointer(shader_program.vertexTextureCoordAttribute, object.vertex_texture_coord_buffer.itemSize, gl.FLOAT, false, 0, 0);
     } else if (draw_type == 2){
-        console.log("Draw type: 2");
         gl.uniform1i(shader_program.use_textureUniform, draw_type);
         gl.bindTexture(gl.TEXTURE_CUBE_MAP, cube_map_texture);  // bind the texture object to the texture unit
     }
@@ -253,11 +249,18 @@ function initializeRobot(x, y, z){
     var diffuse = 0.5;
     var spec = 0.5;
     var shine = 50;
-    body = createCube(x+0,y+1.5,z,0.5,BLUE,ambient,diffuse,spec,shine);
-    left_arm = createCylinder(x+-0.25, y+1.5, z+0.45, 0.1, 0.75, GREEN, 50, 100,ambient,diffuse,spec,shine);
-    right_arm = createCylinder(x+0.25, y+1.5, z+0.45, 0.1, 0.75, GREEN, 50, 100,ambient,diffuse,spec,shine);
-    head = createCube(x+0,y+2.25,z,0.25,[1,0,0,1],ambient,diffuse,spec,shine);
-    bottom = createSphere(x+0, y+0.5, z, 0.5, [1,0,0,1], 50, 100,ambient,diffuse,spec,shine);
+    body = createCube(x+0,y+1.5,z,1.0,BLUE,ambient,diffuse,spec,shine);
+    left_arm = createCylinder(x, y, z, 0.1, 0.75, GREEN, 50, 100,ambient,diffuse,spec,shine);
+    left_arm.matrix = mat4.rotate(left_arm.matrix, degToRad(95), [0, 1, 0]);
+    left_arm.matrix = mat4.translate(left_arm.matrix, [-.25, 1.9, -3.5]);
+
+    right_arm = createCylinder(x, y, z, 0.1, 0.75, GREEN, 50, 100,ambient,diffuse,spec,shine);
+    right_arm.matrix = mat4.rotate(right_arm.matrix, degToRad(85), [0, 1, 0]);
+    right_arm.matrix = mat4.translate(right_arm.matrix, [1.75, 1.9, -3.5]);
+
+
+    head = createCube(x+0,y+3,z,0.5,[1,0,0,1],ambient,diffuse,spec,shine);
+    bottom = createSphere(x+0, y-0.5, z, 1.1, [1,0,0,1], 50, 100,ambient,diffuse,spec,shine);
 }
 
 function switchShader(newShader){
@@ -274,7 +277,7 @@ function webGLStart() {
     shader_program = texture_map_shader_program;
     initializeShaderVariables();
     // initTextures();
-    loadObject(jetpack, RESOURCE_LOCATION + "jetpack.json");
+    loadObject(jetpack, RESOURCE_LOCATION + "jetpack.obj");
 
     loadImages([
         RESOURCE_LOCATION + "cubemap1/posx.png",
@@ -293,7 +296,8 @@ function webGLStart() {
         RESOURCE_LOCATION + "cubemap1/negy.png",
         RESOURCE_LOCATION + "cubemap1/posz.png",
         RESOURCE_LOCATION + "cubemap1/negz.png",
-        RESOURCE_LOCATION + "rusty_metal.png",
+        RESOURCE_LOCATION + "corten_steel.jpeg",
+        // RESOURCE_LOCATION + "rusty_metal.png",
         RESOURCE_LOCATION + "metal_spiral.png"
     ], handleImagesLoaded);
 
@@ -304,7 +308,6 @@ function webGLStart() {
     light_bulb = createSphere(LIGHT_X, LIGHT_Y, LIGHT_Z, 0.15, WHITE, 50, 100, 1, 1, 1, 1);
     initializeRoom();
     initializeRobot(COI[0], COI[1], COI[2]);
-
 
     document.addEventListener('keydown', keypressHandler, false);
     document.addEventListener('mousedown', onDocumentMouseDown, false);
@@ -364,7 +367,6 @@ function drawScene() {
     gl.uniform1i(shader_program.textureUniform, 6);    // pass the texture unit to the shader
     drawObject(body, "TRIANGLES", 1);
     drawObject(head, "TRIANGLES", 1);
-    // drawObject(body, "TRIANGLES", 1);
     //
     // gl.activeTexture(gl.TEXTURE7);                      // set texture unit 0 to use
     // gl.bindTexture(gl.TEXTURE_2D, textures[7]);        // bind the texture object to the texture unit
@@ -374,16 +376,13 @@ function drawScene() {
     // mvMatrix = setMVmatrix();
 
 
-
     switchShader(cube_map_shader_program);
-    mvMatrix = mat4.multiply(mvMatrix, movement_matrix);
 
     mat4.identity(v2wMatrix);
     v2wMatrix = mat4.multiply(v2wMatrix, vMatrix);
     v2wMatrix = mat4.multiply(v2wMatrix, movement_matrix);
-    v2wMatrix = mat4.inverse(v2wMatrix);
     v2wMatrix = mat4.transpose(v2wMatrix);
-    //
+
     gl.activeTexture(gl.TEXTURE1);   // set texture unit 0 to use
     gl.bindTexture(gl.TEXTURE_2D, cube_map_texture);    // bind the texture object to the texture unit
     gl.uniform1i(shader_program.cube_mapUniform, 1);         // pass the textu
@@ -392,8 +391,10 @@ function drawScene() {
     drawObject(bottom, "TRIANGLES", 2);
     // drawObject(body, "TRIANGLES", 2);
     // drawObject(head, "TRIANGLES", 2);
+    drawObject(jetpack, "TRIANGLES", 2);
+    mvMatrix = setMVmatrix();
     drawObject(left_arm, "TRIANGLES", 2);
+    mvMatrix = setMVmatrix();
     drawObject(right_arm, "TRIANGLES", 2);
-    drawObject(jetpack, "TRIANGLES", 0);
 
 }
