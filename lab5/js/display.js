@@ -10,9 +10,9 @@
 // Initialize all global variables
 var Z_ANGLE = 0.0;
 var FOV_ANGLE = 80.0;
-var CAMERA_X = -4;
-var CAMERA_Y = 6;
-var CAMERA_Z = 3.5;
+var CAMERA_X = -12.5;
+var CAMERA_Y = -6;
+var CAMERA_Z = 12;
 var LIGHT_X = 3;
 var LIGHT_Y = 5;
 var LIGHT_Z = 0;
@@ -23,8 +23,6 @@ var gl;
 var shader_program;
 var cube_map_shader_program;
 var texture_map_shader_program;
-var draw_type = 2;
-var square = {};
 var env_neg_y = {};
 var env_pos_y = {};
 var env_neg_x = {};
@@ -54,15 +52,7 @@ var corrugatedTexture;
 var textures = [];
 var cube_map_texture = {};
 var movement_matrix = mat4.create();
-
 const RESOURCE_LOCATION = "./resources/";
-
-function initTextures() {
-    rustyTexture = gl.createTexture();
-    rustyTexture.image = new Image();
-    rustyTexture.image.src = RESOURCE_LOCATION + "rusty_metal.png";
-    rustyTexture.image.onload = function() { handleTextureLoaded(rustyTexture); }
-}
 
 function loadObject(object, file_location) {
     var request = new  XMLHttpRequest();
@@ -72,7 +62,7 @@ function loadObject(object, file_location) {
           if (request.readyState == 4) {
           jetpack =  new OBJ.Mesh(request.responseText);
           buildLoadedObject(jetpack, [0.4, 0.4, 0.5, 1])
-          console.log(jetpack);
+          drawScene();
         }
       }
     request.send();
@@ -116,9 +106,7 @@ function handleImagesLoaded(images){
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
         textures.push(texture);
     }
-
     drawScene();
-
 }
 
 function handleTextureLoaded(texture) {
@@ -127,7 +115,6 @@ function handleTextureLoaded(texture) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.bindTexture(gl.TEXTURE_2D, null);
-    console.log("Loaded rusty texture");
 }
 
 function handleCubeMapImagesLoaded(images){
@@ -270,35 +257,32 @@ function switchShader(newShader){
 }
 
 function webGLStart() {
-    var canvas = document.getElementById("lab4-canvas");
+    var canvas = document.getElementById("lab5-canvas");
     initGL(canvas);
     initShaders();
     gl.useProgram(texture_map_shader_program);
     shader_program = texture_map_shader_program;
     initializeShaderVariables();
-    // initTextures();
     loadObject(jetpack, RESOURCE_LOCATION + "jetpack.obj");
 
     loadImages([
-        RESOURCE_LOCATION + "cubemap1/posx.png",
-        RESOURCE_LOCATION + "cubemap1/negx.png",
-        RESOURCE_LOCATION + "cubemap1/posy.png",
-        RESOURCE_LOCATION + "cubemap1/negy.png",
-        RESOURCE_LOCATION + "cubemap1/posz.png",
-        RESOURCE_LOCATION + "cubemap1/negz.png",
+        RESOURCE_LOCATION + "cubemap/posx.png",
+        RESOURCE_LOCATION + "cubemap/negx.png",
+        RESOURCE_LOCATION + "cubemap/posy.png",
+        RESOURCE_LOCATION + "cubemap/negy.png",
+        RESOURCE_LOCATION + "cubemap/posz.png",
+        RESOURCE_LOCATION + "cubemap/negz.png",
     ], handleCubeMapImagesLoaded);
 
 
     loadImages([
-        RESOURCE_LOCATION + "cubemap1/posx.png",
-        RESOURCE_LOCATION + "cubemap1/negx.png",
-        RESOURCE_LOCATION + "cubemap1/posy.png",
-        RESOURCE_LOCATION + "cubemap1/negy.png",
-        RESOURCE_LOCATION + "cubemap1/posz.png",
-        RESOURCE_LOCATION + "cubemap1/negz.png",
+        RESOURCE_LOCATION + "cubemap/posx.png",
+        RESOURCE_LOCATION + "cubemap/negx.png",
+        RESOURCE_LOCATION + "cubemap/posy.png",
+        RESOURCE_LOCATION + "cubemap/negy.png",
+        RESOURCE_LOCATION + "cubemap/posz.png",
+        RESOURCE_LOCATION + "cubemap/negz.png",
         RESOURCE_LOCATION + "corten_steel.jpeg",
-        // RESOURCE_LOCATION + "rusty_metal.png",
-        RESOURCE_LOCATION + "metal_spiral.png"
     ], handleImagesLoaded);
 
     mat4.identity(movement_matrix);
@@ -310,7 +294,6 @@ function webGLStart() {
     initializeRobot(COI[0], COI[1], COI[2]);
 
     document.addEventListener('keydown', keypressHandler, false);
-    document.addEventListener('mousedown', onDocumentMouseDown, false);
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
 }
@@ -320,8 +303,6 @@ function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // mvMatrix = setMVmatrix();
-    // drawObject(light_bulb, "TRIANGLES");
     switchShader(texture_map_shader_program);
 
     mvMatrix = setMVmatrix();
@@ -332,48 +313,41 @@ function drawScene() {
 
     drawObject(env_pos_x, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE1);                     // set texture unit 0 to use
+    gl.activeTexture(gl.TEXTURE1);                     // set texture unit 1 to use
     gl.uniform1i(shader_program.textureUniform, 1);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[1]);        // bind the texture object to the texture unit
 
     drawObject(env_neg_x, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE2);                     // set texture unit 0 to use
+    gl.activeTexture(gl.TEXTURE2);                     // set texture unit 2 to use
     gl.uniform1i(shader_program.textureUniform, 2);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[2]);        // bind the texture object to the texture unit
 
     drawObject(env_pos_y, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE3);                     // set texture unit 0 to use
+    gl.activeTexture(gl.TEXTURE3);                     // set texture unit 3 to use
     gl.uniform1i(shader_program.textureUniform, 3);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[3]);        // bind the texture object to the texture unit
 
     drawObject(env_neg_y, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE4);                     // set texture unit 0 to use
+    gl.activeTexture(gl.TEXTURE4);                     // set texture unit 4 to use
     gl.uniform1i(shader_program.textureUniform, 4);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[4]);        // bind the texture object to the texture unit
 
     drawObject(env_pos_z, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE5);                     // set texture unit 0 to use
+    gl.activeTexture(gl.TEXTURE5);                     // set texture unit 5 to use
     gl.uniform1i(shader_program.textureUniform, 5);    // pass the texture unit to the shader
     gl.bindTexture(gl.TEXTURE_2D, textures[5]);        // bind the texture object to the texture unit
 
     drawObject(env_neg_z, "TRIANGLES", 1);
 
-    gl.activeTexture(gl.TEXTURE6);                     // set texture unit 0 to use
+    gl.activeTexture(gl.TEXTURE6);                     // set texture unit 6 to use
     gl.bindTexture(gl.TEXTURE_2D, textures[6]);        // bind the texture object to the texture unit
     gl.uniform1i(shader_program.textureUniform, 6);    // pass the texture unit to the shader
     drawObject(body, "TRIANGLES", 1);
     drawObject(head, "TRIANGLES", 1);
-    //
-    // gl.activeTexture(gl.TEXTURE7);                      // set texture unit 0 to use
-    // gl.bindTexture(gl.TEXTURE_2D, textures[7]);        // bind the texture object to the texture unit
-    // gl.uniform1i(shader_program.textureUniform, 7);      // pass the texture unit to the shader
-    //
-    // drawObject(head, "TRIANGLES", 1);
-    // mvMatrix = setMVmatrix();
 
 
     switchShader(cube_map_shader_program);
@@ -383,17 +357,16 @@ function drawScene() {
     v2wMatrix = mat4.multiply(v2wMatrix, movement_matrix);
     v2wMatrix = mat4.transpose(v2wMatrix);
 
-    gl.activeTexture(gl.TEXTURE1);   // set texture unit 0 to use
+    gl.activeTexture(gl.TEXTURE7);                      // set texture unit 7 to use
     gl.bindTexture(gl.TEXTURE_2D, cube_map_texture);    // bind the texture object to the texture unit
-    gl.uniform1i(shader_program.cube_mapUniform, 1);         // pass the textu
+    gl.uniform1i(shader_program.cube_mapUniform, 7);
 
-    // mvMatrix = mat4.rotate(mvMatrix, degToRad(90), [0, 1, 0]);
     drawObject(bottom, "TRIANGLES", 2);
-    // drawObject(body, "TRIANGLES", 2);
-    // drawObject(head, "TRIANGLES", 2);
-    drawObject(jetpack, "TRIANGLES", 2);
+    drawObject(jetpack, "TRIANGLES",2);
+
     mvMatrix = setMVmatrix();
     drawObject(left_arm, "TRIANGLES", 2);
+
     mvMatrix = setMVmatrix();
     drawObject(right_arm, "TRIANGLES", 2);
 

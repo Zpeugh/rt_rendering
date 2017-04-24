@@ -2,8 +2,8 @@
   * Date: 4/9/2017
   * Author: Zach Peugh
   * Class: CSE 5542
-  * Assignment: Lab 4
-  * Desciption: Main html file for lab 4
+  * Assignment: Lab 5
+  * Desciption: Main html file for lab 5
 -->
 
 <!DOCTYPE html>
@@ -17,8 +17,8 @@
     <link rel="stylesheet" type="text/css" href="css/display.css">
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 
-    <title>Lab 4</title>
-    <!--  ************** Fragment Shader ************* -->
+    <title>Lab 5</title>
+    <!--  ************** Cube Map Fragment Shader ************* -->
     <script id="shader-fs" type="x-shader/x-fragment">
       precision mediump float;
       precision mediump int;
@@ -44,42 +44,10 @@
       varying highp vec2 texture_coord;
 
       void main(void) {
-
-        // int type = int(use_texture);
-        // // int type = 1;
-        //  if ( type == 0) {
-        //     //  Calculate Ambient Lighting
-        //      vec4 ambient =  ambient_coef * ambient_color;
-        //      // Calculate Diffuse Lighting
-        //      vec3 light_dir = normalize(vec3(light_pos_in_eye) - vec3(pos_in_eye));
-        //      float n_dot_l = max(dot(normal_in_eye, light_dir), 0.0);
-        //      vec4 diffuse = n_dot_l * diffuse_color;
-        //
-        //     // Calculate Specular Lighting
-        //     vec3 view_dir = normalize(-pos_in_eye);
-        //     // TODO: see if this should be -view_dir instead of light_dir
-        //     vec3 reflect_dir = reflect(-light_dir, normal_in_eye);
-        //     float r_dot_v = max(dot(reflect_dir,view_dir), 0.0);
-        //     float spec = pow(r_dot_v, shininess);
-        //     vec4 specular = vec4(0.0, 0.0, 0.0, 1.0);
-        //     if (n_dot_l > 0.0){
-        //         specular = specular_coef * spec * specular_color;
-        //     }
-        //     // Combined fragment color
-        //     // gl_FragColor = (ambient + diffuse + specular) * object_color * light_intensity;
-        //
-        // } else if (type == 1){
-        //
-        //      gl_FragColor = texture2D(texture, texture_coord);
-        //
-        // } else if (type == 2) {
-
             vec3 view_vector = normalize(-pos_in_eye);
             vec3 ref = normalize(reflect(-view_vector, normal_in_eye));  // in eye space
             ref = vec3(uV2WMatrix * vec4(ref,0));   // convert to world space
             gl_FragColor = textureCube(cube_map, ref);
-
-        // }
       }
 
     </script>
@@ -276,7 +244,7 @@
 
 <body onload="webGLStart();">
         <div class="row">
-            <canvas id="lab4-canvas" height="500" , width="500"></canvas>
+            <canvas id="lab5-canvas" height="500" , width="500"></canvas>
         </div>
     </div>
 

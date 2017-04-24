@@ -1,3 +1,9 @@
+/**
+**  This was NOT written by me.  All of this code is property of GitHub user
+**  frenchtoast747.  The original repository can be seen at:
+**  https://github.com/frenchtoast747/webgl-obj-loader
+**/
+
 (function (scope, undefined) {
   'use strict';
 

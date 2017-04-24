@@ -27,7 +27,8 @@ const Z_UP = 88;
 const Z_DOWN = 90;
 const PANE_SPEED = 0.5;
 const Z_SPEED = 2.5;
-var lastMouseX = 0, lastMouseY = 0;
+var lastMouseX = 0,
+    lastMouseY = 0;
 
 
 function setMatrixUniforms() {
@@ -50,129 +51,51 @@ function degToRad(degrees) {
     return degrees * Math.PI / 180;
 }
 
-
-function changeLightIntensity(up_or_down){
-    switch (up_or_down){
-        case "UP":
-            if (light_intensity < 3){
-                light_intensity += 0.01;
-            }
+function keypressHandler(key) {
+    switch (key.which) {
+        case PANE_RIGHT:
+            CAMERA_X += PANE_SPEED;
+            drawScene();
             break;
-        case "DOWN":
-            if (light_intensity > 0.51){
-                light_intensity -= 0.01;
-            }
+        case PANE_LEFT:
+            CAMERA_X -= PANE_SPEED;
+            drawScene();
             break;
-    }
-}
-
-function updateLightPosition(pos, light_xchange) {
-    switch (pos) {
-        case "X":
-            light_pos[0] += light_change;
-            light_bulb.matrix = mat4.translate(light_bulb.matrix, [light_change, 0, 0])
+        case PANE_UP:
+            CAMERA_Y += PANE_SPEED;
+            drawScene();
             break;
-        case "Y":
-            light_pos[1] += light_change;
-            light_bulb.matrix = mat4.translate(light_bulb.matrix, [0, light_change, 0])
+        case PANE_DOWN:
+            CAMERA_Y -= PANE_SPEED;
+            drawScene();
             break;
-        case "Z":
-            light_pos[2] += light_change;
-            light_bulb.matrix = mat4.translate(light_bulb.matrix, [0, 0, light_change])
+        case Z_UP:
+            CAMERA_Z += PANE_SPEED;
+            drawScene();
+            break;
+        case Z_DOWN:
+            CAMERA_Z -= PANE_SPEED;
+            drawScene();
+            break;
+        case UP:
+            COI[1] += PANE_SPEED;
+            drawScene();
+            break;
+        case DOWN:
+            COI[1] -= PANE_SPEED;
+            drawScene();
+            break;
+        case RIGHT:
+            COI[0] += PANE_SPEED;
+            drawScene();
+            break;
+        case LEFT:
+            COI[0] -= PANE_SPEED;
+            drawScene();
             break;
         default:
-            console.log("here");
-            break;
+            console.log("Invalid keypress: " + key.which);
+            return;
     }
+    key.preventDefault();
 }
-    function keypressHandler(key) {
-        switch (key.which) {
-            case PANE_RIGHT:
-                console.log("right");
-                CAMERA_X += PANE_SPEED;
-                drawScene();
-                break;
-            case PANE_LEFT:
-                console.log("left");
-                CAMERA_X -= PANE_SPEED;
-                drawScene();
-                break;
-            case PANE_UP:
-                CAMERA_Y += PANE_SPEED;
-                drawScene();
-                break;
-            case PANE_DOWN:
-                CAMERA_Y -= PANE_SPEED;
-                drawScene();
-                break;
-            case Z_UP:
-                CAMERA_Z += PANE_SPEED;
-                drawScene();
-                break;
-            case Z_DOWN:
-                CAMERA_Z -= PANE_SPEED;
-                drawScene();
-                break;
-            case UP:
-                COI[1] += PANE_SPEED;
-                drawScene();
-                break;
-            case DOWN:
-                COI[1] -= PANE_SPEED;
-                drawScene();
-                break;
-            case RIGHT:
-                COI[0] += PANE_SPEED;
-                drawScene();
-                break;
-            case LEFT:
-                COI[0] -= PANE_SPEED;
-                drawScene();
-                break;
-            default:
-                console.log("Invalid keypress: " + key.which);
-                return;
-        }
-        key.preventDefault();
-    }
-
-
-    function onDocumentMouseDown( event ) {
-         event.preventDefault();
-         document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-         document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-         document.addEventListener( 'mouseout', onDocumentMouseOut, false );
-         var mouseX = event.clientX;
-         var mouseY = event.clientY;
-
-         lastMouseX = mouseX;
-         lastMouseY = mouseY;
-
-     }
-
-    function onDocumentMouseMove( event ) {
-         var mouseX = event.clientX;
-         var mouseY = event.ClientY;
-
-         var diffX = mouseX - lastMouseX;
-         var diffY = mouseY - lastMouseY;
-
-         Z_ANGLE = Z_ANGLE + diffX/5;
-
-         lastMouseX = mouseX;
-         lastMouseY = mouseY;
-
-         drawScene();
-    }
-
-    function onDocumentMouseUp( event ) {
-         document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-         document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-         document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-    }
-
-    function onDocumentMouseOut( event ) {
-         document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
-         document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
-         document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
-    }
